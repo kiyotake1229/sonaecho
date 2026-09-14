@@ -1,0 +1,16 @@
+{
+  "appId": "work.ltv.sonaecho",
+  "appName": "そなえ帳",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#F3F6F5",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#0E7C6B"
+    }
+  }
+}

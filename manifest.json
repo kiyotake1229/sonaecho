@@ -1,0 +1,17 @@
+{
+  "name": "そなえ帳 — 備蓄と防災の手帳",
+  "short_name": "そなえ帳",
+  "description": "家庭の備蓄と防災の手帳。世帯人数から必要量を計算し、賞味期限を見守り、もしもの時は通信なしで使える道具箱になる。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F6F5",
+  "theme_color": "#0E7C6B",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

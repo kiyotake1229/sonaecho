@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0E7C6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="そなえ帳">
+<meta name="description" content="家庭の備蓄と防災の手帳。世帯人数から必要量を計算し、賞味期限を見守り、もしもの時は通信なしで使える道具箱になる。">
+<title>そなえ帳 — 備蓄と防災の手帳</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --p:#0E7C6B; --p2:#17A48C; --pl:#E1F3EE; --pd:#0A5E51;
+  --bg:#F3F6F5; --card:#FFFFFF; --card2:#F6F9F8; --text:#15201E; --sub:#6C7A77; --line:#E4EAE8;
+  --ok:#16A34A; --okl:#E4F6EA; --warn:#E08A00; --warnl:#FFF2D9; --bad:#DC2650; --badl:#FDE7ED; --info:#2563EB; --infol:#E5EEFF;
+  --shadow:0 6px 22px rgba(20,44,40,.08); --shadow2:0 2px 8px rgba(20,44,40,.06);
+  --r:20px; --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
+}
+:root[data-theme="dark"]{
+  --p:#22B39A; --p2:#3BCBB1; --pl:#143A34; --pd:#8FE3D2;
+  --bg:#0E1413; --card:#17201F; --card2:#1E2A28; --text:#EDF3F1; --sub:#8B9995; --line:#26332F;
+  --okl:#153322; --warnl:#3A2A0C; --badl:#3B1420; --infol:#14213F;
+  --shadow:0 6px 22px rgba(0,0,0,.35); --shadow2:0 2px 8px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text);overscroll-behavior-y:none;-webkit-user-select:none;user-select:none;transition:background .3s,color .3s;line-height:1.45;-webkit-text-size-adjust:100%}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--text);background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;width:100%;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--pl)}
+textarea{min-height:84px;resize:vertical}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:12px 2px 6px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app{max-width:520px;margin:0 auto;min-height:100%;position:relative;padding-bottom:calc(92px + var(--safe-b))}
+
+header.top{padding:calc(14px + var(--safe-t)) 20px 6px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.h-title{font-size:25px;font-weight:800;letter-spacing:-.3px}
+.h-sub{font-size:12.5px;color:var(--sub);font-weight:600;margin-top:1px}
+.icon-btn{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow2);transition:transform .15s,background .2s;color:var(--text)}
+.icon-btn:active{transform:scale(.9)}
+
+.screen{display:none;padding:0 16px}
+.screen.active{display:block;animation:fade .32s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.06);opacity:.85}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin:0 0 14px;animation:rise .35s ease both}
+.card.flat{box-shadow:none;border:1.5px solid var(--line)}
+.card h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.card h3 svg.i{width:18px;height:18px;color:var(--p)}
+.card .more{margin-left:auto;font-size:12.5px;color:var(--p);font-weight:700;display:flex;align-items:center;gap:2px}
+.muted{color:var(--sub);font-size:13px}
+.small{font-size:12px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:6px 6px;margin-top:4px}
+.sec-head h3{font-size:15px;font-weight:800}
+.cnt{font-size:12px;color:var(--sub);font-weight:700;background:var(--card);padding:2px 9px;border-radius:20px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;border-radius:26px;padding:20px 18px;margin:6px 0 16px;position:relative;overflow:hidden;box-shadow:0 12px 30px rgba(14,124,107,.32)}
+.hero::before{content:"";position:absolute;right:-40px;top:-50px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.12)}
+.hero::after{content:"";position:absolute;left:-30px;bottom:-70px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero .in{position:relative;display:flex;align-items:center;gap:18px}
+.ring{width:104px;height:104px;flex:none;position:relative}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .bgc{stroke:rgba(255,255,255,.22)}
+.ring .fgc{stroke:#fff;transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;text-align:center;line-height:1}
+.ring .pct b{font-size:31px;font-weight:800;letter-spacing:-1px}
+.ring .pct span{font-size:10px;opacity:.85;font-weight:700;margin-top:3px;display:block}
+.hero h2{font-size:19px;font-weight:800;margin-bottom:4px;letter-spacing:-.2px}
+.hero p{font-size:13px;opacity:.92;font-weight:500}
+.hero .lv{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}
+
+/* bars */
+.bars{display:grid;gap:12px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none;background:var(--pl);color:var(--p)}
+.bar-body{flex:1;min-width:0}
+.bar-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13.5px;font-weight:700;margin-bottom:6px}
+.bar-top>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-top>span:last-child{white-space:nowrap;flex:none}
+.bar-sub{font-size:11.5px;color:var(--sub);margin-top:4px;font-weight:600}
+.bar-top span{color:var(--sub);font-size:12px;font-weight:600}
+.bar{height:9px;border-radius:9px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--p),var(--p2));width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.bar i.w{background:linear-gradient(90deg,#E08A00,#F5B84A)}
+.bar i.b{background:linear-gradient(90deg,#DC2650,#F0648A)}
+.bar i.g{background:linear-gradient(90deg,#16A34A,#3ED27A)}
+
+/* alerts */
+.alert{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;margin-bottom:10px;font-size:13.5px;font-weight:600;transition:transform .15s}
+.alert:active{transform:scale(.98)}
+.alert svg.i{width:20px;height:20px;margin-top:1px}
+.alert.bad{background:var(--badl);color:var(--bad)}
+.alert.warn{background:var(--warnl);color:var(--warn)}
+.alert.info{background:var(--infol);color:var(--info)}
+.alert.ok{background:var(--okl);color:var(--ok)}
+.alert small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:2px}
+
+/* quick tools */
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tool{background:var(--card);border-radius:18px;padding:14px 6px 11px;display:flex;flex-direction:column;align-items:center;gap:7px;box-shadow:var(--shadow2);font-size:11.5px;font-weight:700;color:var(--text);transition:transform .15s;position:relative;overflow:hidden}
+.tool:active{transform:scale(.93)}
+.tool .tic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff}
+.tool .tic svg.i{width:24px;height:24px}
+.tools.big{grid-template-columns:repeat(2,1fr)}
+.tools.big .tool{padding:18px 12px;font-size:14px;flex-direction:row;justify-content:flex-start;gap:12px;text-align:left}
+.tools.big .tool .tic{width:48px;height:48px;border-radius:15px}
+.tools.big .tool small{display:block;font-size:11px;color:var(--sub);font-weight:600;margin-top:2px}
+
+/* tips */
+.tip{display:flex;gap:12px;align-items:flex-start}
+.tip .tic{width:38px;height:38px;border-radius:12px;background:var(--warnl);color:var(--warn);display:grid;place-items:center;flex:none}
+.tip b{display:block;font-size:14px;margin-bottom:2px}
+.tip p{font-size:13px;color:var(--sub)}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;-ms-overflow-style:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:20px;background:var(--card);font-size:13px;font-weight:700;color:var(--sub);box-shadow:var(--shadow2);transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.chip svg.i{width:15px;height:15px}
+.chip.on{background:var(--p);color:#fff;box-shadow:0 6px 14px rgba(14,124,107,.3)}
+.chip .n{font-size:11px;background:rgba(0,0,0,.08);padding:1px 6px;border-radius:10px}
+.chip.on .n{background:rgba(255,255,255,.25)}
+
+/* segmented */
+.seg{display:flex;background:var(--card);border-radius:14px;padding:4px;box-shadow:var(--shadow2);margin:4px 0 12px;position:relative}
+.seg button{flex:1;padding:9px 4px;border-radius:11px;font-size:13px;font-weight:700;color:var(--sub);transition:all .25s;position:relative;z-index:1}
+.seg button.on{color:#fff}
+.seg .ind{position:absolute;top:4px;bottom:4px;left:4px;border-radius:11px;background:var(--p);transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s;z-index:0;box-shadow:0 4px 12px rgba(14,124,107,.35)}
+
+/* items list */
+.item{background:var(--card);border-radius:18px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow2);transition:transform .15s,opacity .3s;animation:rise .3s ease both}
+.item:active{transform:scale(.985)}
+.item .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:none;color:#fff}
+.item .body{flex:1;min-width:0}
+.item .nm{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .meta{font-size:12px;color:var(--sub);display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px}
+.item .qty{display:flex;align-items:center;gap:2px;flex:none}
+.item .qty b{min-width:38px;text-align:center;font-size:16px;font-weight:800}
+.item .qty small{font-size:11px;color:var(--sub);font-weight:600;margin-left:1px}
+.item .qty button{width:32px;height:32px;border-radius:10px;background:var(--card2);display:grid;place-items:center;transition:transform .12s,background .2s}
+.item .qty button:active{transform:scale(.85);background:var(--pl)}
+.item .qty button svg.i{width:16px;height:16px}
+.badge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.badge.ok{background:var(--okl);color:var(--ok)}
+.badge.warn{background:var(--warnl);color:var(--warn)}
+.badge.bad{background:var(--badl);color:var(--bad)}
+.badge.gray{background:var(--card2);color:var(--sub)}
+.badge.p{background:var(--pl);color:var(--p)}
+.cat-c1{background:linear-gradient(135deg,#2E86DE,#54A0FF)}
+.cat-c2{background:linear-gradient(135deg,#E8791D,#F5A15A)}
+.cat-c3{background:linear-gradient(135deg,#8E5BD6,#B48CF0)}
+.cat-c4{background:linear-gradient(135deg,#E5A700,#F7C948)}
+.cat-c5{background:linear-gradient(135deg,#D94A2B,#F07A5C)}
+.cat-c6{background:linear-gradient(135deg,#DE3B6A,#F27097)}
+.cat-c7{background:linear-gradient(135deg,#E86FB1,#F5A3D0)}
+.cat-c8{background:linear-gradient(135deg,#5D8A3F,#8BBF67)}
+.cat-c9{background:linear-gradient(135deg,#A56A2E,#D19A5B)}
+.cat-c10{background:linear-gradient(135deg,#5B6B78,#8A9BA8)}
+
+.empty{text-align:center;padding:36px 20px;color:var(--sub);font-size:13.5px;animation:rise .35s}
+.empty .eic{width:68px;height:68px;border-radius:22px;background:var(--card);box-shadow:var(--shadow2);display:grid;place-items:center;margin:0 auto 14px;color:var(--p)}
+.empty .eic svg.i{width:32px;height:32px}
+.empty b{display:block;font-size:15px;color:var(--text);margin-bottom:4px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:15px;font-size:15px;font-weight:800;transition:transform .15s,opacity .2s,background .2s;width:100%}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--p);color:#fff;box-shadow:0 8px 20px rgba(14,124,107,.3)}
+.btn.sec{background:var(--pl);color:var(--pd)}
+.btn.ghost{background:var(--card2);color:var(--text)}
+.btn.danger{background:var(--badl);color:var(--bad)}
+.btn.sm{padding:9px 14px;font-size:13px;width:auto;border-radius:12px}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+.link{color:var(--p);font-weight:700;font-size:13px}
+
+.fab{position:fixed;right:calc(50% - 250px);bottom:calc(88px + var(--safe-b));width:56px;height:56px;border-radius:19px;background:var(--p);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(14,124,107,.4);z-index:20;transition:transform .2s;animation:pop .4s ease}
+.fab:active{transform:scale(.9) rotate(90deg)}
+.fab svg.i{width:26px;height:26px;stroke-width:2.5}
+@media (max-width:540px){.fab{right:18px}}
+
+/* stepper */
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:38px;height:38px;border-radius:12px;background:var(--card2);display:grid;place-items:center;transition:transform .12s}
+.stepper button:active{transform:scale(.85)}
+.stepper button svg.i{width:17px;height:17px}
+.stepper b{min-width:34px;text-align:center;font-size:18px;font-weight:800}
+.hh{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.hh:last-child{border-bottom:none}
+.hh .l{display:flex;align-items:center;gap:12px}
+.hh .l .ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:#fff}
+.hh .l .ic:not([class*="cat-c"]){background:var(--pl);color:var(--p)}
+.hh .l b{font-size:15px;display:block}
+.hh .l small{font-size:12px;color:var(--sub)}
+
+/* checklist */
+.ck{display:flex;align-items:flex-start;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);transition:opacity .3s}
+.ck:last-child{border-bottom:none}
+.ck .box{width:26px;height:26px;border-radius:9px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:all .2s;margin-top:1px;background:var(--card)}
+.ck .box svg.i{width:16px;height:16px;stroke-width:3;color:#fff;opacity:0;transform:scale(.4);transition:all .2s}
+.ck.on .box{background:var(--p);border-color:var(--p)}
+.ck.on .box svg.i{opacity:1;transform:scale(1);animation:pop .3s}
+.ck .t{flex:1;font-size:14.5px;font-weight:600}
+.ck.on .t{color:var(--sub);text-decoration:line-through;text-decoration-color:var(--line)}
+.ck .t small{display:block;font-size:12px;color:var(--sub);font-weight:500;text-decoration:none}
+.ck .del{color:var(--sub);opacity:.5;padding:4px}
+.cl-card{cursor:pointer}
+.cl-card .cl-top{display:flex;align-items:center;gap:12px}
+.cl-card .cl-ic{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;flex:none}
+.cl-card .cl-body{flex:1;min-width:0}
+.cl-card .cl-body b{font-size:15px;display:block}
+.cl-card .cl-body small{font-size:12px;color:var(--sub)}
+.cl-card .pctn{font-size:20px;font-weight:800;color:var(--p)}
+.cl-card .bar{margin-top:12px;height:7px}
+
+/* accordion */
+.acc{border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:none}
+.acc .ah{display:flex;align-items:center;gap:12px;padding:14px 2px;font-size:15px;font-weight:700;width:100%;text-align:left}
+.acc .ah .aic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;flex:none}
+.acc .ah .chev{margin-left:auto;color:var(--sub);transition:transform .3s}
+.acc.open .ah .chev{transform:rotate(180deg)}
+.acc .ab{display:none;padding:0 2px 16px 52px;font-size:14px;color:var(--text)}
+.acc.open .ab{display:block;animation:fade .3s}
+.acc .ab ol{padding-left:20px;display:grid;gap:8px}
+.acc .ab li{padding-left:2px}
+.acc .ab .nb{margin-top:10px;background:var(--warnl);color:var(--warn);font-size:12.5px;padding:10px 12px;border-radius:12px;font-weight:600}
+
+/* switch */
+.sw{width:50px;height:30px;border-radius:30px;background:var(--line);position:relative;transition:background .25s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.sw.on{background:var(--p)}
+.sw.on::after{transform:translateX(20px)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.set-row:last-child{border-bottom:none}
+.set-row .sl b{font-size:14.5px;display:block;font-weight:700}
+.set-row .sl small{font-size:12px;color:var(--sub)}
+.set-row select{width:auto;padding:8px 32px 8px 12px;border-radius:11px;font-size:14px;font-weight:700;background:var(--card2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236C7A77' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center}
+
+/* sheet */
+.backdrop{position:fixed;inset:0;background:rgba(10,20,18,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:50}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);width:100%;max-width:560px;background:var(--card);border-radius:28px 28px 0 0;padding:10px 20px calc(24px + var(--safe-b));z-index:60;transition:transform .38s cubic-bezier(.32,.72,0,1);max-height:92vh;max-height:92dvh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+.sheet.show{transform:translate(-50%,0)}
+.sheet .grab{width:40px;height:5px;border-radius:5px;background:var(--line);margin:4px auto 14px}
+.sheet h2{font-size:19px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.sheet h2 svg.i{color:var(--p)}
+.sheet .sub{font-size:13px;color:var(--sub);margin-bottom:12px}
+.preset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.preset{background:var(--card2);border-radius:14px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:700;text-align:center;transition:transform .12s,background .2s;border:1.5px solid transparent;line-height:1.2}
+.preset:active{transform:scale(.94)}
+.preset.on{border-color:var(--p);background:var(--pl)}
+.preset .pic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff}
+.preset .pic svg.i{width:20px;height:20px}
+.preset small{font-size:10.5px;color:var(--sub);font-weight:600}
+.search{position:relative;margin-top:6px}
+.search svg.i{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--sub)}
+.search input{padding-left:42px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-head{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.detail-head .ic{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;color:#fff;flex:none}
+.detail-head .ic svg.i{width:28px;height:28px}
+.detail-head b{font-size:19px;display:block}
+.detail-head small{font-size:12.5px;color:var(--sub)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.kv div{background:var(--card2);border-radius:14px;padding:10px 12px}
+.kv small{display:block;font-size:11px;color:var(--sub);font-weight:700}
+.kv b{font-size:15px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(100px + var(--safe-b));transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:all .3s;z-index:90;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:88%;text-align:center;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast svg.i{width:18px;height:18px}
+
+/* tab bar */
+nav.tabs{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:520px;background:var(--card);border-radius:24px 24px 0 0;display:flex;padding:8px 6px calc(8px + var(--safe-b));box-shadow:0 -6px 24px rgba(20,44,40,.08);z-index:30}
+:root[data-theme="dark"] nav.tabs{box-shadow:0 -6px 24px rgba(0,0,0,.4)}
+nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 4px;font-size:10.5px;font-weight:700;color:var(--sub);border-radius:14px;transition:color .2s;position:relative}
+nav.tabs button svg.i{width:24px;height:24px;transition:transform .25s}
+nav.tabs button.on{color:var(--p)}
+nav.tabs button.on svg.i{transform:translateY(-2px)}
+nav.tabs button.on::before{content:"";position:absolute;top:0;width:36px;height:4px;border-radius:4px;background:var(--p);opacity:.9}
+nav.tabs button.sos.on{color:var(--bad)}
+nav.tabs button.sos.on::before{background:var(--bad)}
+nav.tabs .dot{position:absolute;top:4px;right:calc(50% - 16px);width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid var(--card)}
+
+/* onboarding */
+.ob{position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;display:none}
+.ob.show{display:block}
+.ob .in{max-width:520px;margin:0 auto;padding:calc(30px + var(--safe-t)) 24px calc(30px + var(--safe-b));min-height:100%;display:flex;flex-direction:column}
+.ob .logo{width:84px;height:84px;border-radius:26px;margin:20px auto 18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:0 14px 30px rgba(14,124,107,.35);color:#fff;animation:pop .5s ease}
+.ob .logo svg.i{width:44px;height:44px}
+.ob h1{font-size:26px;font-weight:800;text-align:center;letter-spacing:-.3px}
+.ob .lead{text-align:center;color:var(--sub);font-size:14px;margin:8px 0 26px}
+.ob .dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.ob .dots i{width:8px;height:8px;border-radius:8px;background:var(--line);transition:all .3s}
+.ob .dots i.on{width:24px;background:var(--p)}
+.ob .step{display:none;animation:fade .35s}
+.ob .step.on{display:block}
+.ob .grow{flex:1}
+.feat{display:flex;gap:14px;align-items:flex-start;padding:12px 0}
+.feat .fic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:none}
+.feat b{display:block;font-size:15px}
+.feat p{font-size:13px;color:var(--sub)}
+.days{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dayopt{background:var(--card);border-radius:18px;padding:16px;border:2px solid transparent;text-align:left;transition:all .2s;box-shadow:var(--shadow2)}
+.dayopt.on{border-color:var(--p);background:var(--pl)}
+.dayopt b{font-size:22px;display:block;font-weight:800}
+.dayopt small{font-size:12px;color:var(--sub);font-weight:600}
+
+/* light overlay */
+.light{position:fixed;inset:0;background:#fff;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(30px + var(--safe-b))}
+.light.show{display:flex}
+.light.off{background:#000}
+.light .lctl{display:flex;gap:12px}
+.light .lctl button{background:rgba(0,0,0,.08);color:#111;padding:12px 18px;border-radius:14px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+.light.off .lctl button{background:rgba(255,255,255,.15);color:#fff}
+.light .lhint{color:#666;font-size:12px;margin-bottom:14px;font-weight:600}
+.light.off .lhint{color:#999}
+
+/* SOS card */
+.sos-hero{background:linear-gradient(135deg,#C81E45,#F0506E);color:#fff;border-radius:24px;padding:18px;margin:6px 0 14px;box-shadow:0 12px 30px rgba(220,38,80,.3);position:relative;overflow:hidden}
+.sos-hero::after{content:"";position:absolute;right:-30px;top:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.12)}
+.sos-hero h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.sos-hero p{font-size:13px;opacity:.92}
+.whistle{width:100%;padding:22px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;font-weight:800;font-size:16px;transition:transform .15s}
+.whistle:active{transform:scale(.97)}
+.whistle .wic{width:74px;height:74px;border-radius:50%;background:var(--badl);color:var(--bad);display:grid;place-items:center;transition:all .3s}
+.whistle .wic svg.i{width:36px;height:36px}
+.whistle.on .wic{background:var(--bad);color:#fff;animation:pulse 1s infinite;box-shadow:0 0 0 12px rgba(220,38,80,.15)}
+.fam{background:var(--card2);border-radius:16px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:center}
+.fam .av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px;flex:none}
+.fam .fb{flex:1;min-width:0}
+.fam .fb b{font-size:15px;display:block}
+.fam .fb small{font-size:12px;color:var(--sub);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fam a{color:var(--p);display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--pl)}
+.msgbox{background:var(--card2);border-radius:16px;padding:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;border:1.5px dashed var(--line);margin:10px 0}
+.note{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.note:last-child{border-bottom:none}
+.note time{font-size:11.5px;color:var(--sub);font-weight:700;flex:none;width:44px;padding-top:2px}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.score-row:last-child{border:none}
+.score-row b{font-weight:800;color:var(--p)}
+.score-row small{color:var(--sub);display:block;font-size:11.5px}
+.center{text-align:center}
+.ver{text-align:center;color:var(--sub);font-size:11.5px;margin:18px 0 6px;line-height:1.7}
+.hidden{display:none!important}
+.pill-warn{display:inline-flex;align-items:center;gap:6px;background:var(--warnl);color:var(--warn);font-size:12px;font-weight:700;padding:5px 10px;border-radius:10px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+<symbol id="i-checksq" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+<symbol id="i-siren" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+<symbol id="i-food" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></symbol>
+<symbol id="i-toilet" viewBox="0 0 24 24"><path d="M5 9h8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M9 9V6h4l3-3M13 6h3M16 3h4"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+<symbol id="i-medkit" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M12 10v6M9 13h6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<symbol id="i-baby" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol>
+<symbol id="i-senior" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-paw" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="4" cy="8" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></symbol>
+<symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<symbol id="i-light" viewBox="0 0 24 24"><path d="M18 6c0 2-2 2-2 4v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V10c0-2-2-2-2-4V2h12z"/><path d="M6 6h12M12 12h.01"/></symbol>
+<symbol id="i-whistle" viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+<symbol id="i-chevd" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-chevr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M8 16H3v5M16 8h5V3"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+<symbol id="i-wind" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+<symbol id="i-rain" viewBox="0 0 24 24"><path d="M16 13v8M8 13v8M12 15v8M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></symbol>
+<symbol id="i-battery" viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2M6 11v2M10 11v2M14 11v2"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+<symbol id="i-clip" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+<symbol id="i-idcard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M14 10h5M14 14h5M5 17c.5-1.5 1.7-2 3-2s2.5.5 3 2"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol>
+<symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 22c4-2 7-5 7-9 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-5-3-7-1 3-5 6-5 11 0 4 3 7 7 9z"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5M9 8V2M15 8V2M18 8v5a6 6 0 0 1-12 0V8z"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-6h6v6"/></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></symbol>
+</svg>
+
+<div class="ob" id="ob"></div>
+
+<div id="app">
+  <header class="top">
+    <div><div class="h-title" id="hTitle">そなえ帳</div><div class="h-sub" id="hSub"></div></div>
+    <div style="display:flex;gap:8px" id="hBtns"></div>
+  </header>
+  <section class="screen active" id="s-home"></section>
+  <section class="screen" id="s-stock"></section>
+  <section class="screen" id="s-check"></section>
+  <section class="screen" id="s-sos"></section>
+  <section class="screen" id="s-set"></section>
+</div>
+
+<button class="fab hidden" id="fab" aria-label="備蓄を追加"><svg class="i"><use href="#i-plus"/></svg></button>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="home" class="on"><svg class="i"><use href="#i-home"/></svg>ホーム</button>
+  <button data-tab="stock"><svg class="i"><use href="#i-box"/></svg>備蓄</button>
+  <button data-tab="check"><svg class="i"><use href="#i-checksq"/></svg>チェック</button>
+  <button data-tab="sos" class="sos"><svg class="i"><use href="#i-siren"/></svg>もしも</button>
+  <button data-tab="set"><svg class="i"><use href="#i-set"/></svg>設定</button>
+</nav>
+
+<div class="backdrop" id="bd"></div>
+<div class="sheet" id="sheet" role="dialog"></div>
+<div class="toast" id="toast"></div>
+
+<div class="light" id="light">
+  <div class="lhint" id="lhint">画面の明るさを最大にするとより明るくなります</div>
+  <div class="lctl">
+    <button id="lSos"><svg class="i"><use href="#i-sparkle"/></svg>SOS点滅</button>
+    <button id="lClose"><svg class="i"><use href="#i-x"/></svg>閉じる</button>
+  </div>
+</div>
+<script>
+/* =====================================================================
+   そなえ帳 — 家庭の備蓄と防災の手帳
+   単一HTML / 通信なし / データは端末内(localStorage)のみ
+   ===================================================================== */
+const APP_VER="1.0.0";
+const STORE_KEY="sonaecho-v1";
+
+/* ---------- 分類（必要量の計算式つき） ----------
+   need(h,d): h=世帯(p=人数, infants, elderly, pets), d=目標日数
+   出典目安: 内閣府・農水省「最低3日、推奨1週間」/ 水 1人1日3L / 食料 1人1日3食 / トイレ 1人1日5回 */
+const CATS=[
+ {id:"water", name:"水",          ic:"drop",   c:1, unit:"L",   track:"飲料水",     hint:"1人1日 3L",   need:(h,d)=>3*h.p*d},
+ {id:"food",  name:"食料",        ic:"food",   c:2, unit:"食",  track:"主食・主菜",  hint:"1人1日 3食",  need:(h,d)=>3*h.p*d},
+ {id:"toilet",name:"トイレ・衛生", ic:"toilet", c:3, unit:"回",  track:"簡易トイレ",  hint:"1人1日 5回",  need:(h,d)=>5*h.p*d},
+ {id:"light", name:"明かり・電源", ic:"bolt",   c:4},
+ {id:"cook",  name:"調理・熱源",   ic:"flame",  c:5, unit:"本",  track:"カセットボンベ",hint:"1人1日 0.5本",need:(h,d)=>Math.ceil(h.p*d*0.5)},
+ {id:"med",   name:"救急・薬",     ic:"medkit", c:6},
+ {id:"baby",  name:"乳幼児",       ic:"baby",   c:7, unit:"枚",  track:"おむつ",     hint:"1人1日 8枚",  need:(h,d)=>8*h.infants*d, when:h=>h.infants>0},
+ {id:"senior",name:"高齢者・介護", ic:"senior", c:8, when:h=>h.elderly>0},
+ {id:"pet",   name:"ペット",       ic:"paw",    c:9, unit:"日分", track:"ペットフード", hint:"1匹1日 1日分", need:(h,d)=>d*h.pets, when:h=>h.pets>0},
+ {id:"other", name:"道具・その他", ic:"tool",   c:10},
+];
+const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
+
+/* ---------- 備蓄プリセット ----------
+   [名前, 分類, 単位, 1つあたりの寄与量(0=数えない), 目安保存期間(月, 0=期限なし), 置き場所] */
+const PRESETS=[
+ ["水 2L","water","本",2,60,"押入れ"],["水 500ml","water","本",0.5,60,"玄関"],["保存水 1.5L","water","本",1.5,60,"押入れ"],["ウォータータンク","water","個",0,0,"押入れ"],
+ ["アルファ米","food","袋",1,60,"押入れ"],["レトルトご飯","food","個",1,12,"キッチン"],["カップ麺","food","個",1,6,"キッチン"],["缶詰","food","缶",1,36,"キッチン"],["レトルトカレー","food","個",1,24,"キッチン"],["乾パン・ビスケット","food","缶",3,60,"押入れ"],["栄養補助食品","food","箱",3,12,"キッチン"],["乾麺","food","袋",2,12,"キッチン"],["シリアル","food","袋",3,6,"キッチン"],["野菜ジュース","food","本",0,12,"キッチン"],["フリーズドライ味噌汁","food","個",0,12,"キッチン"],["お菓子・チョコ","food","個",0,6,"キッチン"],["ゼリー飲料","food","個",0,12,"キッチン"],
+ ["簡易トイレ","toilet","回分",1,180,"押入れ"],["トイレットペーパー","toilet","ロール",0,0,"洗面所"],["ウェットティッシュ","toilet","個",0,36,"洗面所"],["除菌シート","toilet","個",0,36,"洗面所"],["生理用品","toilet","個",0,36,"洗面所"],["マスク","toilet","枚",0,0,"玄関"],["ゴミ袋 45L","toilet","枚",0,0,"キッチン"],["歯みがきシート","toilet","個",0,36,"洗面所"],["ドライシャンプー","toilet","本",0,36,"洗面所"],["ティッシュ","toilet","箱",0,0,"押入れ"],
+ ["懐中電灯","light","個",0,0,"玄関"],["ランタン","light","個",0,0,"押入れ"],["ヘッドライト","light","個",0,0,"持ち出し袋"],["乾電池 単3","light","本",0,120,"押入れ"],["乾電池 単1","light","本",0,120,"押入れ"],["乾電池 単4","light","本",0,120,"押入れ"],["モバイルバッテリー","light","個",0,0,"リビング"],["手回し充電ラジオ","light","台",0,0,"持ち出し袋"],["ろうそく・マッチ","light","組",0,0,"押入れ"],["ソーラー充電器","light","個",0,0,"押入れ"],
+ ["カセットコンロ","cook","台",0,0,"キッチン"],["カセットボンベ","cook","本",1,84,"キッチン"],["給水袋","cook","個",0,0,"押入れ"],["使い捨て食器","cook","組",0,0,"キッチン"],["ラップ","cook","本",0,0,"キッチン"],["アルミホイル","cook","本",0,0,"キッチン"],["割りばし・スプーン","cook","組",0,0,"キッチン"],["ポリ袋（湯せん可）","cook","枚",0,0,"キッチン"],
+ ["救急セット","med","個",0,0,"リビング"],["常備薬","med","日分",0,12,"リビング"],["絆創膏","med","枚",0,36,"リビング"],["消毒液","med","本",0,36,"洗面所"],["体温計","med","個",0,0,"リビング"],["解熱鎮痛剤","med","箱",0,36,"リビング"],["経口補水液","med","本",0,18,"キッチン"],["お薬手帳のコピー","med","部",0,0,"持ち出し袋"],["包帯・ガーゼ","med","組",0,0,"リビング"],["マスク（医療用）","med","枚",0,0,"リビング"],
+ ["おむつ","baby","枚",1,0,"押入れ"],["液体ミルク","baby","本",0,12,"キッチン"],["粉ミルク","baby","缶",0,18,"キッチン"],["離乳食","baby","個",0,12,"キッチン"],["おしりふき","baby","個",0,36,"押入れ"],["哺乳瓶（使い捨て）","baby","本",0,0,"押入れ"],["抱っこひも","baby","個",0,0,"玄関"],["母子手帳のコピー","baby","部",0,0,"持ち出し袋"],
+ ["介護用おむつ","senior","枚",0,0,"押入れ"],["とろみ剤","senior","個",0,24,"キッチン"],["入れ歯洗浄剤","senior","個",0,36,"洗面所"],["予備の眼鏡","senior","個",0,0,"持ち出し袋"],["杖・歩行補助具","senior","本",0,0,"玄関"],["常用薬（予備）","senior","日分",0,12,"リビング"],["介護食（やわらか食）","senior","個",0,12,"キッチン"],["補聴器の電池","senior","個",0,60,"リビング"],
+ ["ペットフード","pet","日分",1,12,"キッチン"],["ペットシーツ","pet","枚",0,0,"押入れ"],["キャリーケース","pet","個",0,0,"玄関"],["予備のリード・首輪","pet","本",0,0,"玄関"],["迷子札・写真","pet","組",0,0,"持ち出し袋"],["ペット用おやつ","pet","袋",0,12,"キッチン"],["トイレ砂","pet","袋",0,0,"押入れ"],
+ ["軍手・手袋","other","組",0,0,"玄関"],["現金（小銭）","other","千円",0,0,"持ち出し袋"],["ブルーシート","other","枚",0,0,"押入れ"],["ガムテープ","other","個",0,0,"押入れ"],["笛（ホイッスル）","other","個",0,0,"持ち出し袋"],["ヘルメット・防災頭巾","other","個",0,0,"玄関"],["毛布・寝袋","other","枚",0,0,"押入れ"],["カイロ","other","個",0,48,"押入れ"],["雨具","other","組",0,0,"玄関"],["予備の眼鏡・コンタクト","other","個",0,0,"持ち出し袋"],["筆記用具・メモ","other","組",0,0,"持ち出し袋"],["ロープ","other","本",0,0,"押入れ"],["多機能ナイフ","other","個",0,0,"持ち出し袋"],["身分証・通帳のコピー","other","部",0,0,"持ち出し袋"],["スリッパ・運動靴","other","足",0,0,"寝室"],["新聞紙","other","束",0,0,"押入れ"],
+];
+const PLACES=["キッチン","押入れ","玄関","リビング","寝室","洗面所","持ち出し袋","車","ベランダ・物置","職場","その他"];
+
+/* ---------- チェックリスト ---------- */
+const CHECKLISTS=[
+ {id:"bag",  name:"非常持ち出し袋", ic:"bag",   c:5, desc:"避難時に持ち出す最低限。玄関や寝室に置く", items:[
+  ["飲料水（500ml×2〜3本）"],["すぐ食べられる食料（1〜2日分）"],["懐中電灯・ヘッドライト"],["モバイルバッテリー・充電ケーブル"],["携帯ラジオ"],["救急セット・常備薬"],["マスク・除菌シート"],["簡易トイレ（数回分）"],["ティッシュ・ウェットティッシュ"],["軍手・タオル"],["雨具・防寒具"],["笛（ホイッスル）"],["現金（小銭を含む）"],["身分証・保険証のコピー"],["家族の連絡先メモ（紙）"],["筆記用具"],["ポリ袋・ゴミ袋"],["歯ブラシ・歯みがきシート"],["眼鏡・コンタクトの予備"],["生理用品"],
+  ["おむつ・おしりふき","infants"],["ミルク・哺乳瓶・離乳食","infants"],["母子手帳のコピー","infants"],["抱っこひも","infants"],
+  ["常用薬とお薬手帳","elderly"],["介護用品・入れ歯","elderly"],["杖・補助具","elderly"],
+  ["ペットフード・水（数日分）","pets"],["リード・キャリーケース","pets"],["ペットの写真・迷子札","pets"],
+ ]},
+ {id:"home", name:"在宅避難の備え", ic:"house", c:1, desc:"自宅で数日過ごすための備え。備蓄タブと合わせて確認", items:[
+  ["飲料水を人数×3日分以上"],["食料を人数×3日分以上（加熱なしで食べられる物も）"],["簡易トイレを人数×3日分以上"],["カセットコンロとボンベ"],["ランタン（部屋全体を照らせる明かり）"],["乾電池の予備（機器と同じサイズ）"],["モバイルバッテリーを常に満充電"],["風呂の水をためておく習慣（生活用水）"],["ラップ・ポリ袋（食器の節水に）"],["カイロ・毛布（冬）／冷却シート（夏）"],["紙皿・割りばし"],["ゴミ袋（大小・多め）"],["ラジオ（情報源）"],["現金"],["消火器"],
+ ]},
+ {id:"safety",name:"家の安全対策", ic:"shield", c:8, desc:"地震のケガの多くは家具の転倒。まず家の中から", items:[
+  ["背の高い家具を壁に固定した"],["寝室に倒れてくる家具がない"],["寝室の枕元にスリッパ・懐中電灯を置いた"],["ガラスに飛散防止フィルムを貼った"],["食器棚の扉に開き止めをつけた"],["テレビ・電子レンジを固定した"],["出入口や避難経路に物を置いていない"],["消火器の場所と使い方を知っている"],["ブレーカーとガスの元栓の位置を知っている"],["感震ブレーカーを設置した"],["ハザードマップで自宅の危険度を確認した"],["避難所・避難場所の場所を確認した"],["浸水の恐れがある場合の垂直避難先を決めた"],
+ ]},
+ {id:"info", name:"情報・連絡の備え", ic:"radio", c:3, desc:"つながらない時にどう連絡を取るかを決めておく", items:[
+  ["家族の集合場所を決めた（もしもタブに登録）"],["家族カードに連絡先を登録した"],["災害用伝言ダイヤル171の使い方を家族で確認した"],["自治体の防災メール・防災アプリを登録した"],["緊急速報メールの受信をONにした"],["連絡先を紙にも書いて持ち歩いている"],["保険証・お薬手帳・通帳を写真に撮った"],["車のガソリンは半分以下にしない"],["職場・学校からの帰宅経路を確認した"],["近所の人と顔見知りになっている"],["年2回（3月・9月）に備蓄を見直す"],
+ ]},
+];
+
+/* ---------- 行動ガイド ---------- */
+const GUIDES=[
+ {id:"quake", name:"地震", ic:"siren", c:5, steps:[
+  "まず身を守る。机の下に入る、頭を守る、倒れそうな物から離れる",
+  "揺れが収まったら火の元を確認。無理に消しに行かない",
+  "ドアや窓を開けて出口を確保する",
+  "ガラスに注意。靴やスリッパを履く",
+  "ラジオ・防災アプリで正しい情報を確認。デマに注意",
+  "沿岸部なら津波の情報を待たず高台へ",
+  "避難するときはブレーカーを落とし、ガスの元栓を閉める",
+ ], note:"余震は数日続くことがあります。倒れかけた家具には近づかないでください。"},
+ {id:"tsunami", name:"津波", ic:"wave", c:1, steps:[
+  "強い揺れ・長い揺れを感じたら、警報を待たずにすぐ避難",
+  "「より高く・より遠く」。高台か津波避難ビルの上階へ",
+  "車での避難は渋滞のもと。原則は徒歩",
+  "第一波が最大とは限らない。警報が解除されるまで戻らない",
+  "川沿いも危険。川からも離れる",
+ ], note:"海岸で揺れを感じたら、まず逃げてから情報を確認してください。"},
+ {id:"storm", name:"台風・大雨", ic:"rain", c:3, steps:[
+  "接近前に：ベランダの物を片付け、雨戸を閉め、水と食料と充電を確認",
+  "ハザードマップで自宅の危険度を確認。危険なら明るいうちに避難",
+  "警戒レベル4（避難指示）で全員避難。レベル3で高齢者等は避難開始",
+  "外が危険なときは家の2階以上・崖から離れた部屋へ（垂直避難）",
+  "川や用水路の様子を見に行かない",
+  "浸水した道路は歩かない。マンホールや側溝が見えない",
+ ], note:"避難所へ行くことだけが避難ではありません。安全な親戚・知人宅も選択肢です。"},
+ {id:"fire", name:"火災", ic:"fire", c:2, steps:[
+  "大声で周りに知らせ、119番",
+  "初期消火は天井に火が届く前まで。届いたら迷わず逃げる",
+  "煙は上にたまる。姿勢を低くし、口と鼻をハンカチで覆う",
+  "逃げるときはドアを閉めて空気を遮断する",
+  "一度逃げたら絶対に戻らない",
+ ], note:"消火器は「ピン・ホース・レバー」の順。火の根元を狙います。"},
+ {id:"blackout", name:"停電", ic:"plug", c:4, steps:[
+  "まず懐中電灯・ランタン。ろうそくは火災の恐れがあるので最後の手段",
+  "冷蔵庫は開けない。冷蔵は数時間、冷凍は半日〜1日程度もつ",
+  "スマホは低電力モードに。画面の明るさを下げ、不要な通信を切る",
+  "使っていた電気製品のスイッチを切る（復旧時の火災防止）",
+  "外出時はブレーカーを落とす",
+  "夏は熱中症、冬は低体温に注意。水分と防寒を",
+ ], note:"復旧の情報は電力会社の公式サイトやラジオで確認できます。"},
+ {id:"water", name:"断水", ic:"drop", c:10, steps:[
+  "断水の情報が出たら、すぐに風呂・鍋・ペットボトルに水をためる",
+  "飲料水は1人1日3Lを目安に配分する",
+  "トイレは流さず簡易トイレを使う（排水管が壊れている恐れ）",
+  "食器はラップを敷いて使い、洗い物を減らす",
+  "給水所の情報は自治体の発表を確認。給水袋・台車があると楽",
+ ], note:"復旧直後の水はにごることがあります。しばらく流してから使ってください。"},
+];
+
+/* ---------- 日替わりのひとこと ---------- */
+const TIPS=[
+ ["ローリングストック","ふだん食べる物を少し多めに買い、食べたら買い足す。これだけで期限切れが減ります。"],
+ ["水は1人1日3L","飲む分と調理で3L。3人家族で3日分なら27Lです。"],
+ ["トイレは意外と切実","断水すると水洗トイレは使えません。1人1日5回分の簡易トイレを。"],
+ ["電池のサイズをそろえる","懐中電灯・ラジオ・ランタンの電池を同じサイズにすると予備がムダになりません。"],
+ ["枕元にスリッパ","地震のあとは床にガラスが散ります。寝室にスリッパと懐中電灯を。"],
+ ["ボンベは1日0.5本","カセットボンベ1本で強火約1時間。家族で1週間なら10本前後が目安です。"],
+ ["171を試してみる","災害用伝言ダイヤルは毎月1日・15日に体験利用ができます。"],
+ ["集合場所は2か所","自宅近くの避難場所と、遠くの親戚宅など、遠近2つ決めておくと安心です。"],
+ ["風呂の水は捨てない","翌朝まで残しておけば、断水時のトイレや生活用水になります。"],
+ ["モバイルバッテリーは常に満充電","使ったらすぐ充電。停電時はスマホが情報源であり連絡手段です。"],
+ ["ラップは万能","皿に敷けば洗い物いらず。包帯代わりや防寒にも使えます。"],
+ ["現金は小銭で","停電で電子決済が使えないことがあります。公衆電話にも小銭が要ります。"],
+ ["ガソリンは半分ルール","半分を切ったら給油。停電ではガソリンスタンドも止まります。"],
+ ["食べ慣れた味を","非常時こそ普段の味がほっとします。缶詰やレトルトは好きな物を。"],
+ ["年2回の点検日","3月と9月、防災の日に合わせて期限と数量を見直しましょう。"],
+ ["ハザードマップを見る","自宅が浸水・土砂災害の区域かどうかで、避難の考え方が変わります。"],
+ ["家具の固定が一番","地震のケガの3〜5割は家具の転倒・落下が原因といわれます。"],
+ ["紙の連絡先","スマホの電池が切れたら番号がわかりません。家族の番号は紙にも。"],
+ ["ペットも家族","フードとトイレ用品を数日分。写真と迷子札もお忘れなく。"],
+ ["お薬手帳の写真","持病の薬がわかると避難先で処方を受けやすくなります。"],
+ ["カイロは冬の保険","停電で暖房が止まると室内でも冷えます。使い捨てカイロを多めに。"],
+];
+
+/* ---------- 節電・節水のコツ（もしも画面） ---------- */
+const SAVE_TIPS=[
+ "スマホは低電力モード＋画面の明るさを下げる＋機内モードで電池が数倍もちます",
+ "連絡はSNSやメッセージで短く。通話より通信量も電池も少なくて済みます",
+ "食器にラップを敷き、洗わずに済ませる",
+ "水は「飲む・調理・衛生」の順で優先する。手洗いはウェットティッシュで代用",
+ "冷蔵庫の中身は保冷剤とまとめてクーラーボックスへ移すと長持ちする",
+ "夜は早めに寝て、明かりと電池を節約する",
+];
+</script>
+<script>
+/* ---------- ユーティリティ ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ic=(n,cls="")=>`<svg class="i ${cls}"><use href="#i-${n}"/></svg>`;
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
+const pad=n=>String(n).padStart(2,"0");
+const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const addMonths=(m)=>{const d=new Date();d.setMonth(d.getMonth()+m);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const daysUntil=s=>{if(!s)return null;const a=new Date(s+"T00:00:00"),b=new Date(todayStr()+"T00:00:00");return Math.round((a-b)/86400000);};
+const fmtD=s=>{if(!s)return "期限なし";const [y,m,d]=s.split("-");return `${y}/${+m}/${+d}`;};
+const fmtN=n=>Number.isInteger(n)?n:Math.round(n*10)/10;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------- ネイティブ連携（Capacitor）。Web版はすべてフォールバック ---------- */
+const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+const CAP=(window.Capacitor&&window.Capacitor.Plugins)||{};
+function haptic(kind){
+  if(NATIVE&&CAP.Haptics){try{kind==="ok"?CAP.Haptics.notification({type:"SUCCESS"}):kind==="err"?CAP.Haptics.notification({type:"ERROR"}):CAP.Haptics.impact({style:kind||"LIGHT"});}catch(e){}return;}
+  if(navigator.vibrate){try{navigator.vibrate(kind==="HEAVY"?[0,30,40,30]:kind==="err"?[0,40,60,40]:12);}catch(e){}}
+}
+async function notifyPermission(){
+  if(!(NATIVE&&CAP.LocalNotifications))return false;
+  try{const p=await CAP.LocalNotifications.requestPermissions();return p.display==="granted";}catch(e){return false;}
+}
+async function scheduleNotifications(){
+  if(!(NATIVE&&CAP.LocalNotifications))return;
+  try{
+    const pend=await CAP.LocalNotifications.getPending();
+    if(pend&&pend.notifications&&pend.notifications.length)await CAP.LocalNotifications.cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
+    const list=[];const nd=S.settings.notifyDays;
+    if(S.settings.notifyExp){
+      S.items.filter(i=>i.exp).forEach((it,idx)=>{
+        const d=new Date(it.exp+"T09:00:00");d.setDate(d.getDate()-nd);
+        if(d>new Date()&&list.length<40)list.push({id:5000+idx,title:"そなえ帳",body:`「${it.name}」の期限まであと${nd}日です。使って買い足しましょう`,schedule:{at:d}});
+      });
+    }
+    if(S.settings.notifyCheck){
+      const n=nextCheckDate();list.push({id:4001,title:"そなえ帳",body:"今日は備蓄の点検日。期限と数量を見直しましょう",schedule:{at:new Date(n+"T10:00:00")}});
+    }
+    if(list.length)await CAP.LocalNotifications.schedule({notifications:list});
+  }catch(e){}
+}
+async function testNotification(){
+  if(!(NATIVE&&CAP.LocalNotifications))return false;
+  try{await CAP.LocalNotifications.schedule({notifications:[{id:4002,title:"そなえ帳",body:"通知はこのように届きます",schedule:{at:new Date(Date.now()+1500)}}]});return true;}catch(e){return false;}
+}
+
+/* ---------- 保存（localStorage ＋ ネイティブPreferencesの二重化） ---------- */
+const DEF=()=>({v:1,setup:{done:false},hh:{adults:2,kids:0,infants:0,elderly:0,pets:0,days:3},items:[],shop:[],checks:{},custom:{},family:[],meet:{p1:"",p2:"",shelter:"",memo:""},notes:[],msg:{name:"",place:"",phone:""},settings:{theme:"auto",notifyDays:30,notifyExp:true,notifyCheck:true,lastCheck:null,notifAsked:false},stats:{consumed:0,added:0}});
+let S=DEF();
+function load(){
+  try{const j=localStorage.getItem(STORE_KEY);if(j)S=Object.assign(DEF(),JSON.parse(j));}catch(e){}
+  S.settings=Object.assign(DEF().settings,S.settings||{});S.hh=Object.assign(DEF().hh,S.hh||{});S.meet=Object.assign(DEF().meet,S.meet||{});S.msg=Object.assign(DEF().msg,S.msg||{});
+}
+let saveT=null;
+function save(){
+  const json=JSON.stringify(S);
+  try{localStorage.setItem(STORE_KEY,json);}catch(e){}
+  if(NATIVE&&CAP.Preferences){clearTimeout(saveT);saveT=setTimeout(()=>{try{CAP.Preferences.set({key:STORE_KEY,value:json});}catch(e){}},300);}
+}
+async function restoreFromNative(){
+  if(!(NATIVE&&CAP.Preferences))return;
+  try{const r=await CAP.Preferences.get({key:STORE_KEY});if(r&&r.value&&!localStorage.getItem(STORE_KEY)){localStorage.setItem(STORE_KEY,r.value);load();}}catch(e){}
+}
+
+/* ---------- 計算 ---------- */
+const HH=()=>({...S.hh,p:S.hh.adults+S.hh.kids+S.hh.infants+S.hh.elderly});
+const activeCats=()=>CATS.filter(c=>!c.when||c.when(HH()));
+const trackedCats=()=>activeCats().filter(c=>c.need);
+const need=c=>c.need?c.need(HH(),S.hh.days):0;
+const isExpired=it=>it.exp&&daysUntil(it.exp)<0;
+const have=c=>S.items.filter(i=>i.cat===c.id&&!isExpired(i)).reduce((a,i)=>a+(i.per||0)*i.qty,0);
+const cov=c=>{const n=need(c);return n?clamp(have(c)/n,0,1):0;};
+function expState(it){
+  if(!it.exp)return {k:"none",d:null,t:"期限なし"};
+  const d=daysUntil(it.exp);
+  if(d<0)return {k:"bad",d,t:`期限切れ ${-d}日`};
+  if(d===0)return {k:"bad",d,t:"今日まで"};
+  if(d<=S.settings.notifyDays)return {k:"warn",d,t:`あと${d}日`};
+  if(d<=90)return {k:"ok",d,t:`あと${d}日`};
+  return {k:"ok",d,t:d>365?`あと${Math.floor(d/365)}年${Math.floor(d%365/30)}か月`:`あと${Math.floor(d/30)}か月`};
+}
+function nextCheckDate(){
+  const y=new Date().getFullYear(),t=todayStr();
+  const cands=[`${y}-03-01`,`${y}-09-01`,`${y+1}-03-01`];
+  return cands.find(c=>c>t);
+}
+function checkItems(list){
+  const h=HH();
+  const base=list.items.filter(([,cond])=>!cond||h[cond]>0).map(([label,cond])=>({key:label,label,cond}));
+  const cus=(S.custom[list.id]||[]).map(c=>({key:c.key,label:c.label,custom:true}));
+  return base.concat(cus);
+}
+function checkPct(list){const its=checkItems(list);if(!its.length)return 0;const done=its.filter(i=>(S.checks[list.id]||{})[i.key]).length;return done/its.length;}
+
+function score(){
+  const rows=[];const push=(label,w,ratio,note)=>rows.push({label,w,got:w*clamp(ratio,0,1),note});
+  const tc=trackedCats();
+  const W={water:30,food:25,toilet:15,cook:5,baby:8,pet:6};
+  tc.forEach(c=>{const n=need(c),h=have(c);push(c.name,W[c.id]||5,cov(c),`${fmtN(h)} / ${fmtN(n)}${c.unit}`);});
+  const has=id=>S.items.some(i=>i.cat===id&&!isExpired(i));
+  push("明かり・電源",5,has("light")?1:0,has("light")?"用意あり":"懐中電灯や電池を追加");
+  push("救急・薬",5,has("med")?1:0,has("med")?"用意あり":"救急セットや常備薬を追加");
+  if(HH().elderly>0)push("高齢者・介護",4,has("senior")?1:0,has("senior")?"用意あり":"介護用品を追加");
+  const bag=CHECKLISTS.find(l=>l.id==="bag");push("非常持ち出し袋",10,checkPct(bag),`${Math.round(checkPct(bag)*100)}% 完了`);
+  const fam=S.family.some(f=>f.phone||f.name);const meet=!!(S.meet.p1||S.meet.shelter);
+  push("連絡の備え",5,(fam?0.5:0)+(meet?0.5:0),fam&&meet?"家族カード・集合場所あり":!fam&&!meet?"家族カードと集合場所を登録":fam?"集合場所を登録":"家族カードを登録");
+  const exp=S.items.filter(isExpired).length;push("期限管理",5,exp===0?1:exp<=2?0.5:0,exp?`期限切れ ${exp}点`:"期限切れなし");
+  const wsum=rows.reduce((a,r)=>a+r.w,0),gsum=rows.reduce((a,r)=>a+r.got,0);
+  const total=Math.round(gsum/wsum*100);
+  return {total,rows};
+}
+const LEVELS=[[0,"これから"],[20,"はじめの一歩"],[40,"そなえ中"],[60,"しっかり"],[80,"安心"],[100,"万全"]];
+const levelName=t=>{let n=LEVELS[0][1];LEVELS.forEach(([m,nm])=>{if(t>=m)n=nm;});return n;};
+
+/* ---------- UI 基本 ---------- */
+let tab="home",stockSeg="list",stockCat="all";
+const SHOT=new URLSearchParams(location.search).get("shot")==="1";
+function toast(msg,icn){if(SHOT)return;const t=$("toast");t.innerHTML=(icn?ic(icn):"")+esc(msg);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+function openSheet(html){const s=$("sheet");s.innerHTML=`<div class="grab"></div>`+html;s.scrollTop=0;$("bd").classList.add("show");requestAnimationFrame(()=>s.classList.add("show"));haptic("LIGHT");}
+function closeSheet(){$("sheet").classList.remove("show");$("bd").classList.remove("show");}
+$("bd").onclick=closeSheet;
+function showTab(t){
+  tab=t;document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id==="s-"+t));
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  $("fab").classList.toggle("hidden",!(t==="stock"&&stockSeg!=="shop"));
+  window.scrollTo(0,0);render();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{haptic("LIGHT");showTab(b.dataset.tab);});
+$("fab").onclick=()=>sheetAdd();
+
+function applyTheme(){
+  const t=S.settings.theme;const dark=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",dark?"#0E1413":"#0E7C6B");
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);
+
+function render(){
+  const titles={home:["そなえ帳",dateLabel()],stock:["備蓄",`${S.items.length}点を管理中`],check:["チェック","備えの抜けを確認"],sos:["もしも","通信がなくても使えます"],set:["設定",""]};
+  $("hTitle").textContent=titles[tab][0];$("hSub").textContent=titles[tab][1];
+  $("hBtns").innerHTML=tab==="home"?`<button class="icon-btn" id="btnTheme" aria-label="テーマ切替">${ic(document.documentElement.getAttribute("data-theme")==="dark"?"sun":"moon")}</button>`:"";
+  const bt=$("btnTheme");if(bt)bt.onclick=()=>{const d=document.documentElement.getAttribute("data-theme")==="dark";S.settings.theme=d?"light":"dark";save();applyTheme();render();};
+  ({home:renderHome,stock:renderStock,check:renderCheck,sos:renderSos,set:renderSet})[tab]();
+  const alerts=S.items.filter(i=>{const e=expState(i);return e.k==="bad"||e.k==="warn";}).length;
+  const dot=document.querySelector('nav.tabs button[data-tab="stock"] .dot');
+  if(alerts&&!dot)document.querySelector('nav.tabs button[data-tab="stock"]').insertAdjacentHTML("beforeend",'<span class="dot"></span>');
+  if(!alerts&&dot)dot.remove();
+}
+function dateLabel(){const d=new Date();return `${d.getMonth()+1}月${d.getDate()}日（${"日月火水木金土"[d.getDay()]}）`;}
+
+/* ---------- ホーム ---------- */
+function renderHome(){
+  const sc=score();const lv=levelName(sc.total);const h=HH();
+  const tc=trackedCats();const WGT={water:30,food:25,toilet:15,cook:5,baby:8,pet:6};const short=tc.filter(c=>cov(c)<1).sort((a,b)=>(cov(a)-(WGT[a.id]||5)/100)-(cov(b)-(WGT[b.id]||5)/100));
+  const msg=sc.total>=100?"必要量はすべて満たしています。定期的な点検を続けましょう":short.length?`${S.hh.days}日分に対して、${short.slice(0,2).map(c=>c.track).join("と")}が足りません`:"数量は足りています。期限とチェックリストを見直しましょう";
+  const expired=S.items.filter(i=>expState(i).k==="bad"),soon=S.items.filter(i=>expState(i).k==="warn");
+  const r=52,circ=2*Math.PI*r;
+  const tipIdx=Math.floor((Date.now()/86400000))%TIPS.length;const tip=TIPS[tipIdx];
+  const nc=nextCheckDate(),ncd=daysUntil(nc);
+  let alerts="";
+  if(expired.length)alerts+=`<div class="alert bad" onclick="stockSeg='exp';showTab('stock')">${ic("alert")}<div>期限切れが ${expired.length}点あります<small>${esc(expired.slice(0,3).map(i=>i.name).join("・"))}${expired.length>3?" ほか":""}。数には入れていません</small></div></div>`;
+  if(soon.length)alerts+=`<div class="alert warn" onclick="stockSeg='exp';showTab('stock')">${ic("clock")}<div>${S.settings.notifyDays}日以内に期限が来るものが ${soon.length}点<small>${esc(soon.slice(0,3).map(i=>i.name).join("・"))}${soon.length>3?" ほか":""}。今のうちに食べて買い足しましょう</small></div></div>`;
+  if(S.shop.filter(s=>!s.done).length)alerts+=`<div class="alert info" onclick="stockSeg='shop';showTab('stock')">${ic("cart")}<div>買い足しリストに ${S.shop.filter(s=>!s.done).length}件<small>次の買い物で忘れずに</small></div></div>`;
+  if(ncd!==null&&ncd<=14)alerts+=`<div class="alert info" onclick="doCheckDone()">${ic("cal")}<div>${ncd===0?"今日は":`あと${ncd}日で`}備蓄の点検日（${fmtD(nc)}）<small>期限と数量を見直したら、タップして記録</small></div></div>`;
+  if(!S.items.length)alerts+=`<div class="alert ok" onclick="showTab('stock');setTimeout(sheetAdd,350)">${ic("plus")}<div>まずは家にある備蓄を登録しましょう<small>水・食料・トイレの3つから始めるのがおすすめ</small></div></div>`;
+  $("s-home").innerHTML=`
+  <div class="hero" onclick="sheetScore()">
+    <div class="in">
+      <div class="ring"><svg viewBox="0 0 120 120"><circle class="bgc" cx="60" cy="60" r="${r}"/><circle class="fgc" id="ringFg" cx="60" cy="60" r="${r}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/></svg><div class="pct"><div><b>${sc.total}</b><span>そなえ度</span></div></div></div>
+      <div style="flex:1;min-width:0"><div class="lv">${ic("shield")}${esc(lv)}</div><h2>${h.p}人 × ${S.hh.days}日分の備え</h2><p>${esc(msg)}</p></div>
+    </div>
+  </div>
+  <div class="card" style="animation-delay:.05s"><h3>${ic("box")}必要量に対する備え <button class="more" onclick="event.stopPropagation();showTab('stock')">備蓄へ ${ic("chevr")}</button></h3>
+    <div class="bars" style="margin-top:14px">${tc.map(c=>barRow(c)).join("")}</div>
+    <p class="muted small" style="margin-top:12px">内閣府・農水省の目安をもとに計算。期限切れは数に入れません。</p>
+  </div>
+  ${alerts?`<div style="animation:rise .35s .1s both">${alerts}</div>`:""}
+  <div class="sec-head"><h3>もしもの道具</h3><span class="cnt">通信不要</span></div>
+  <div class="tools" style="margin-bottom:14px">
+    <button class="tool" onclick="openLight()"><span class="tic cat-c4">${ic("light")}</span>ライト</button>
+    <button class="tool" onclick="showTab('sos');setTimeout(toggleWhistle,300)"><span class="tic cat-c5">${ic("whistle")}</span>ホイッスル</button>
+    <button class="tool" onclick="sheetFamily()"><span class="tic cat-c1">${ic("idcard")}</span>家族カード</button>
+    <button class="tool" onclick="sheetMsg()"><span class="tic cat-c3">${ic("msg")}</span>安否連絡</button>
+  </div>
+  <div class="card" style="animation-delay:.15s"><div class="tip"><span class="tic">${ic("star")}</span><div><b>${esc(tip[0])}</b><p>${esc(tip[1])}</p></div></div></div>
+  <div class="card flat" style="animation-delay:.2s"><div class="hh" style="border:none;padding:0"><div class="l"><span class="ic">${ic("cal")}</span><div><b>次の点検日 ${fmtD(nc)}</b><small>${S.settings.lastCheck?`前回の点検：${fmtD(S.settings.lastCheck)}`:"年2回（3月1日・9月1日）に見直すのが目安"}</small></div></div><button class="btn sec sm" onclick="doCheckDone()">点検した</button></div></div>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=$("ringFg");if(f)f.style.strokeDashoffset=circ*(1-sc.total/100);document.querySelectorAll("#s-home .bar i").forEach(b=>b.style.width=b.dataset.w+"%");}));
+}
+function barRow(c){
+  const n=need(c),h=have(c),p=cov(c);const cls=p>=1?"g":p>=.5?"":p>=.25?"w":"b";
+  return `<div class="bar-row" onclick="stockCat='${c.id}';stockSeg='list';showTab('stock')"><span class="bar-ic">${ic(c.ic)}</span><div class="bar-body"><div class="bar-top"><span style="color:var(--text)">${c.track}</span><span>${fmtN(h)} / ${fmtN(n)} ${c.unit}</span></div><div class="bar"><i class="${cls}" data-w="${Math.round(p*100)}"></i></div>${p>=1?`<div class="bar-sub" style="color:var(--ok)">${S.hh.days}日分を満たしています</div>`:`<div class="bar-sub">あと ${fmtN(Math.max(0,n-h))}${c.unit}（${c.hint}）</div>`}</div></div>`;
+}
+function doCheckDone(){S.settings.lastCheck=todayStr();save();haptic("ok");toast("点検を記録しました","check");scheduleNotifications();render();}
+function sheetScore(){
+  const sc=score();
+  openSheet(`<h2>${ic("shield")}そなえ度の内訳</h2><p class="sub">${esc(levelName(sc.total))}（${sc.total}点）。世帯 ${HH().p}人・${S.hh.days}日分を基準に計算しています</p>
+  ${sc.rows.map(r=>`<div class="score-row"><div>${esc(r.label)}<small>${esc(r.note)}</small></div><b>${Math.round(r.got)} / ${r.w}</b></div>`).join("")}
+  <p class="muted small" style="margin-top:12px">目安は内閣府・農林水産省の家庭備蓄ガイド（水1人1日3L、食料3食、トイレ5回、最低3日・推奨1週間）をもとにしています。家庭の事情に合わせて増減してください。</p>
+  <button class="btn ghost" style="margin-top:14px" onclick="closeSheet()">閉じる</button>`);
+}
+
+/* ---------- 備蓄 ---------- */
+function renderStock(){
+  const segs=[["list","一覧"],["exp","期限順"],["shop",`買い足し${S.shop.filter(s=>!s.done).length?` (${S.shop.filter(s=>!s.done).length})`:""}`]];
+  const si=segs.findIndex(s=>s[0]===stockSeg);
+  let body="";
+  if(stockSeg==="list")body=stockList();else if(stockSeg==="exp")body=stockExp();else body=stockShop();
+  $("s-stock").innerHTML=`<div class="seg"><span class="ind" style="width:calc((100% - 8px)/3);transform:translateX(${si*100}%)"></span>${segs.map(s=>`<button class="${s[0]===stockSeg?"on":""}" onclick="stockSeg='${s[0]}';showTab('stock')">${s[1]}</button>`).join("")}</div>${body}`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll("#s-stock .bar i").forEach(b=>b.style.width=b.dataset.w+"%")));
+}
+function itemRow(it){
+  const c=CAT[it.cat]||CAT.other,e=expState(it);
+  return `<div class="item" id="it-${it.id}"><span class="ic cat-c${c.c}" onclick="sheetItem('${it.id}')">${ic(c.ic)}</span><div class="body" onclick="sheetItem('${it.id}')"><div class="nm">${esc(it.name)}</div><div class="meta">${it.exp?`<span class="badge ${e.k}">${e.t}</span>`:`<span class="badge gray">期限なし</span>`}${it.place?`<span>${esc(it.place)}</span>`:""}${it.per?`<span>1${esc(it.unit)}=${fmtN(it.per)}${c.unit}</span>`:""}</div></div><div class="qty"><button onclick="chgQty('${it.id}',-1)" aria-label="減らす">${ic("minus")}</button><b>${fmtN(it.qty)}<small>${esc(it.unit)}</small></b><button onclick="chgQty('${it.id}',1)" aria-label="増やす">${ic("plus")}</button></div></div>`;
+}
+function stockList(){
+  const cats=activeCats();const cnt=id=>S.items.filter(i=>i.cat===id).length;
+  const chips=`<div class="chips"><button class="chip ${stockCat==="all"?"on":""}" onclick="stockCat='all';showTab('stock')">すべて <span class="n">${S.items.length}</span></button>${cats.map(c=>`<button class="chip ${stockCat===c.id?"on":""}" onclick="stockCat='${c.id}';showTab('stock')">${ic(c.ic)}${c.name}${cnt(c.id)?` <span class="n">${cnt(c.id)}</span>`:""}</button>`).join("")}</div>`;
+  let head="";
+  if(stockCat!=="all"){const c=CAT[stockCat];if(c&&c.need){const n=need(c),h=have(c),p=cov(c);head=`<div class="card" style="padding:14px"><div class="bar-top"><span>${c.track}の備え（${c.hint}）</span><span>${fmtN(h)} / ${fmtN(n)}${c.unit}</span></div><div class="bar"><i class="${p>=1?"g":p>=.5?"":"w"}" data-w="${Math.round(p*100)}"></i></div>${p<1?`<p class="muted small" style="margin-top:8px">あと${fmtN(n-h)}${c.unit}で${S.hh.days}日分になります</p>`:`<p class="muted small" style="margin-top:8px">${S.hh.days}日分を満たしています</p>`}</div>`;}}
+  let list=S.items.filter(i=>stockCat==="all"||i.cat===stockCat);
+  list=list.slice().sort((a,b)=>(CAT[a.cat].c-CAT[b.cat].c)||((a.exp||"9999")>(b.exp||"9999")?1:-1));
+  let html=chips+head;
+  if(!list.length)html+=`<div class="empty"><div class="eic">${ic("box")}</div><b>${stockCat==="all"?"まだ備蓄がありません":"この分類はまだ空です"}</b>右下の＋から追加できます。<br>よく使うものはプリセットから選べます</div>`;
+  else if(stockCat==="all"){let cur="";list.forEach(it=>{if(it.cat!==cur){cur=it.cat;html+=`<div class="sec-head"><h3>${CAT[cur].name}</h3><span class="cnt">${list.filter(i=>i.cat===cur).length}</span></div>`;}html+=itemRow(it);});}
+  else html+=list.map(itemRow).join("");
+  return html+`<div style="height:70px"></div>`;
+}
+function stockExp(){
+  const withExp=S.items.filter(i=>i.exp).sort((a,b)=>a.exp>b.exp?1:-1),noExp=S.items.filter(i=>!i.exp);
+  const groups=[["期限切れ",i=>daysUntil(i.exp)<0,"bad"],[`${S.settings.notifyDays}日以内`,i=>daysUntil(i.exp)>=0&&daysUntil(i.exp)<=S.settings.notifyDays,"warn"],["90日以内",i=>daysUntil(i.exp)>S.settings.notifyDays&&daysUntil(i.exp)<=90,"ok"],["それ以降",i=>daysUntil(i.exp)>90,"ok"]];
+  let html="";
+  if(!S.items.length)return `<div class="empty"><div class="eic">${ic("cal")}</div><b>まだ備蓄がありません</b>期限を登録すると、切れる前にここに並びます</div>`;
+  groups.forEach(([n,f,k])=>{const l=withExp.filter(f);if(!l.length)return;html+=`<div class="sec-head"><h3>${n}</h3><span class="cnt" style="${k==="bad"?"color:var(--bad)":k==="warn"?"color:var(--warn)":""}">${l.length}</span></div>`+l.map(itemRow).join("");});
+  if(noExp.length)html+=`<div class="sec-head"><h3>期限なし・未設定</h3><span class="cnt">${noExp.length}</span></div>`+noExp.map(itemRow).join("");
+  html+=`<p class="muted small" style="padding:8px 6px">期限が近いものは「食べて買い足す」が基本。項目をタップ →「1つ使った」で買い足しリストに入ります。</p>`;
+  return html+`<div style="height:70px"></div>`;
+}
+function stockShop(){
+  const open=S.shop.filter(s=>!s.done),done=S.shop.filter(s=>s.done);
+  let html=`<div class="card" style="padding:12px"><div style="display:flex;gap:8px"><input id="shopIn" placeholder="買うものを追加（例：水2L 6本）" onkeydown="if(event.key==='Enter')addShopFromInput()"><button class="btn pri sm" style="flex:none" onclick="addShopFromInput()">${ic("plus")}</button></div></div>`;
+  if(!S.shop.length)html+=`<div class="empty"><div class="eic">${ic("cart")}</div><b>買い足しリストは空です</b>備蓄を使ったら「1つ使った」で自動的にここへ入ります</div>`;
+  const row=s=>`<div class="ck ${s.done?"on":""}" style="background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:8px;border:none;box-shadow:var(--shadow2)"><span class="box" onclick="toggleShop('${s.id}')">${ic("check")}</span><div class="t" onclick="toggleShop('${s.id}')">${esc(s.name)}${s.qty?` <span class="badge p">${fmtN(s.qty)}${esc(s.unit||"")}</span>`:""}${s.itemId&&S.items.find(i=>i.id===s.itemId)?`<small>買ったら「備蓄へ」で数量に反映</small>`:""}</div>${s.itemId&&S.items.find(i=>i.id===s.itemId)&&!s.done?`<button class="btn sec sm" style="flex:none" onclick="shopToStock('${s.id}')">備蓄へ</button>`:""}<button class="del" onclick="delShop('${s.id}')">${ic("x")}</button></div>`;
+  if(open.length)html+=`<div class="sec-head"><h3>買うもの</h3><span class="cnt">${open.length}</span></div>`+open.map(row).join("");
+  if(done.length)html+=`<div class="sec-head"><h3>買った</h3><button class="link" onclick="clearShopDone()">まとめて消す</button></div>`+done.map(row).join("");
+  return html;
+}
+function addShopFromInput(){const v=$("shopIn").value.trim();if(!v)return;S.shop.unshift({id:uid(),name:v,done:false});save();haptic("LIGHT");render();setTimeout(()=>{const i=$("shopIn");if(i)i.focus();},50);}
+function toggleShop(id){const s=S.shop.find(x=>x.id===id);if(!s)return;s.done=!s.done;save();haptic(s.done?"ok":"LIGHT");render();}
+function delShop(id){S.shop=S.shop.filter(x=>x.id!==id);save();render();}
+function clearShopDone(){S.shop=S.shop.filter(x=>!x.done);save();render();toast("買ったものを消しました");}
+function shopToStock(id){const s=S.shop.find(x=>x.id===id);const it=S.items.find(i=>i.id===s.itemId);if(!it)return;s.done=true;sheetForm(it,{restock:s.qty||1});}
+
+function chgQty(id,d){const it=S.items.find(i=>i.id===id);if(!it)return;it.qty=Math.max(0,fmtN(it.qty+d));save();haptic("LIGHT");
+  const el=document.querySelector(`#it-${id} .qty b`);if(el){el.firstChild.nodeValue=fmtN(it.qty);el.style.animation="none";el.offsetHeight;el.style.animation="pop .25s";}
+  clearTimeout(chgQty._t);chgQty._t=setTimeout(render,600);}
+function consume(id){const it=S.items.find(i=>i.id===id);if(!it)return;it.qty=Math.max(0,fmtN(it.qty-1));S.stats.consumed++;
+  const ex=S.shop.find(s=>s.itemId===id&&!s.done);if(ex)ex.qty=(ex.qty||1)+1;else S.shop.unshift({id:uid(),name:it.name,qty:1,unit:it.unit,itemId:id,done:false});
+  save();haptic("ok");closeSheet();toast(`${it.name} を1${it.unit}使用。買い足しリストに追加`,"refresh");render();}
+function delItem(id){const it=S.items.find(i=>i.id===id);if(!it)return;if(!confirm(`「${it.name}」を削除しますか？`))return;S.items=S.items.filter(i=>i.id!==id);save();closeSheet();haptic("HEAVY");toast("削除しました","trash");render();}
+
+function sheetItem(id){
+  const it=S.items.find(i=>i.id===id);if(!it)return;const c=CAT[it.cat]||CAT.other,e=expState(it);
+  openSheet(`<div class="detail-head"><span class="ic cat-c${c.c}">${ic(c.ic)}</span><div><b>${esc(it.name)}</b><small>${c.name}${it.place?` ・ ${esc(it.place)}`:""}</small></div></div>
+  <div class="kv"><div><small>数量</small><b>${fmtN(it.qty)} ${esc(it.unit)}</b></div><div><small>期限</small><b style="color:${e.k==="bad"?"var(--bad)":e.k==="warn"?"var(--warn)":"inherit"}">${it.exp?fmtD(it.exp):"なし"}</b>${it.exp?`<small style="margin-top:2px">${e.t}</small>`:""}</div>${it.per?`<div><small>1${esc(it.unit)}あたり</small><b>${fmtN(it.per)} ${c.unit}</b></div><div><small>合計</small><b>${fmtN(it.per*it.qty)} ${c.unit}</b></div>`:""}</div>
+  ${it.memo?`<p class="muted" style="margin-bottom:10px;white-space:pre-wrap">${esc(it.memo)}</p>`:""}
+  <button class="btn pri" onclick="consume('${it.id}')" ${it.qty<=0?"disabled":""}>${ic("refresh")}1${esc(it.unit)}使った（買い足しリストへ）</button>
+  <div class="btn-row"><button class="btn ghost" onclick="sheetForm(S.items.find(i=>i.id==='${it.id}'))">${ic("edit")}編集</button><button class="btn danger" onclick="delItem('${it.id}')">${ic("trash")}削除</button></div>`);
+}
+
+let addCat="all",addQ="";
+function sheetAdd(){
+  addCat="all";addQ="";
+  openSheet(`<h2>${ic("plus")}備蓄を追加</h2><p class="sub">プリセットから選ぶか、下の「自分で入力」から</p>
+  <div class="search">${ic("search")}<input id="addQ" placeholder="名前で探す（例：水、缶詰）" oninput="addQ=this.value;renderPresets()"></div>
+  <div class="chips" id="addChips" style="margin-top:10px"></div>
+  <div id="presetGrid" class="preset-grid"></div>
+  <button class="btn ghost" style="margin-top:14px" onclick="sheetForm(null)">${ic("edit")}自分で入力して追加</button>`);
+  renderPresets();
+}
+function renderPresets(){
+  const cats=activeCats();
+  $("addChips").innerHTML=`<button class="chip ${addCat==="all"?"on":""}" onclick="addCat='all';renderPresets()">すべて</button>`+cats.map(c=>`<button class="chip ${addCat===c.id?"on":""}" onclick="addCat='${c.id}';renderPresets()">${ic(c.ic)}${c.name}</button>`).join("");
+  const q=addQ.trim();const act=new Set(cats.map(c=>c.id));
+  const list=PRESETS.map((p,i)=>({p,i})).filter(({p})=>act.has(p[1])&&(addCat==="all"||p[1]===addCat)&&(!q||p[0].includes(q)));
+  $("presetGrid").innerHTML=list.length?list.map(({p,i})=>{const c=CAT[p[1]];const has=S.items.some(it=>it.name===p[0]);return `<button class="preset ${has?"on":""}" onclick="pickPreset(${i})"><span class="pic cat-c${c.c}">${ic(c.ic)}</span>${esc(p[0])}<small>${has?"登録済み・追加":p[3]?`1${p[2]}=${p[3]}${c.unit}`:p[4]?`目安${p[4]>=12?Math.round(p[4]/12)+"年":p[4]+"か月"}`:"期限なし"}</small></button>`;}).join(""):`<div class="empty" style="grid-column:1/-1;padding:20px"><b>見つかりません</b>「自分で入力」から追加できます</div>`;
+}
+function pickPreset(i){const p=PRESETS[i];sheetForm(null,{name:p[0],cat:p[1],unit:p[2],per:p[3],exp:p[4]?addMonths(p[4]):"",place:p[5]});}
+function sheetForm(it,pre){
+  pre=pre||{};const isNew=!it;const v=Object.assign({name:"",cat:stockCat!=="all"?stockCat:"food",qty:1,unit:"個",per:0,exp:"",place:"",memo:""},it||{},pre.name?pre:{});
+  if(pre.restock)v.qty=fmtN((it?it.qty:0)+pre.restock);
+  const cats=activeCats();
+  openSheet(`<h2>${ic(isNew?"plus":"edit")}${isNew?"備蓄を追加":"編集"}</h2>
+  <label class="f">名前</label><input id="fName" value="${esc(v.name)}" placeholder="例：水 2L" ${isNew&&!pre.name?"autofocus":""}>
+  <div class="two"><div><label class="f">分類</label><select id="fCat" onchange="formCatChanged()">${cats.map(c=>`<option value="${c.id}" ${c.id===v.cat?"selected":""}>${c.name}</option>`).join("")}</select></div><div><label class="f">単位</label><input id="fUnit" value="${esc(v.unit)}" placeholder="本・個・袋"></div></div>
+  <label class="f">数量</label><div class="stepper"><button onclick="stepF('fQty',-1)">${ic("minus")}</button><input id="fQty" type="number" inputmode="decimal" value="${fmtN(v.qty)}" style="width:90px;text-align:center;font-weight:800;font-size:18px;padding:8px"><button onclick="stepF('fQty',1)">${ic("plus")}</button><span class="muted small" style="margin-left:6px">${pre.restock?"買い足し分を加えました":""}</span></div>
+  <div id="fPerWrap"><label class="f">1つあたりの量（必要量の計算に使います）</label><div style="display:flex;align-items:center;gap:8px"><input id="fPer" type="number" inputmode="decimal" step="0.1" value="${fmtN(v.per||0)}" style="width:110px"><span class="muted" id="fPerUnit"></span></div><p class="muted small" style="margin-top:4px">例：水2Lなら「2」、カップ麺なら「1」。数えないものは 0</p></div>
+  <label class="f">賞味・使用期限</label><div style="display:flex;gap:8px;align-items:center"><input id="fExp" type="date" value="${esc(v.exp||"")}" style="flex:1"><button class="btn ghost sm" style="flex:none" onclick="$('fExp').value=''">なし</button></div>
+  <label class="f">置き場所</label><select id="fPlace"><option value="">未設定</option>${PLACES.map(p=>`<option ${p===v.place?"selected":""}>${p}</option>`).join("")}</select>
+  <label class="f">メモ</label><input id="fMemo" value="${esc(v.memo||"")}" placeholder="任意（例：子ども用、辛口）">
+  <div class="btn-row"><button class="btn ghost" style="flex:0 0 auto;width:auto;padding:13px 16px" onclick="${isNew?"sheetAdd()":"sheetItem('"+(it&&it.id)+"')"}">${ic("back")}</button><button class="btn pri" onclick="saveForm('${it?it.id:""}')">${isNew?"追加する":"保存する"}</button></div>`);
+  formCatChanged();
+}
+function formCatChanged(){const c=CAT[$("fCat").value];const w=$("fPerWrap");if(c&&c.need){w.style.display="";$("fPerUnit").textContent=c.unit+"（"+c.track+"）";}else w.style.display="none";}
+function stepF(id,d){const e=$(id);e.value=Math.max(0,fmtN((parseFloat(e.value)||0)+d));haptic("LIGHT");}
+function saveForm(id){
+  const name=$("fName").value.trim();if(!name){toast("名前を入力してください","alert");$("fName").focus();return;}
+  const c=CAT[$("fCat").value];
+  const data={name,cat:c.id,qty:Math.max(0,parseFloat($("fQty").value)||0),unit:$("fUnit").value.trim()||"個",per:c.need?Math.max(0,parseFloat($("fPer").value)||0):0,exp:$("fExp").value||"",place:$("fPlace").value,memo:$("fMemo").value.trim()};
+  if(id){Object.assign(S.items.find(i=>i.id===id),data);toast("保存しました","check");}
+  else{S.items.push(Object.assign({id:uid(),added:Date.now()},data));S.stats.added++;toast(`${name} を追加しました`,"check");}
+  save();haptic("ok");closeSheet();scheduleNotifications();
+  if(tab!=="stock"){stockSeg="list";stockCat=c.id;showTab("stock");}else render();
+}
+
+/* ---------- チェック ---------- */
+function renderCheck(){
+  const total=CHECKLISTS.reduce((a,l)=>a+checkItems(l).length,0),done=CHECKLISTS.reduce((a,l)=>a+checkItems(l).filter(i=>(S.checks[l.id]||{})[i.key]).length,0);
+  $("s-check").innerHTML=`<div class="card" style="padding:14px 16px"><div class="bar-top"><span>全体の進み具合</span><span>${done} / ${total} 項目</span></div><div class="bar" style="height:10px"><i class="g" data-w="${total?Math.round(done/total*100):0}"></i></div></div>
+  ${CHECKLISTS.map((l,i)=>{const p=checkPct(l),n=checkItems(l).length,d=Math.round(p*n);return `<div class="card cl-card" style="animation-delay:${i*.05}s" onclick="sheetChecklist('${l.id}')"><div class="cl-top"><span class="cl-ic cat-c${l.c}">${ic(l.ic)}</span><div class="cl-body"><b>${l.name}</b><small>${esc(l.desc)}</small></div><span class="pctn">${Math.round(p*100)}<span style="font-size:12px">%</span></span></div><div class="bar"><i class="${p>=1?"g":""}" data-w="${Math.round(p*100)}"></i></div><p class="muted small" style="margin-top:8px">${d} / ${n} 項目 ${p>=1?"・完了":""}</p></div>`;}).join("")}
+  <p class="muted small" style="padding:4px 8px">世帯設定（乳幼児・高齢者・ペット）に応じて項目が増えます。自分の項目も追加できます。</p>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll("#s-check .bar i").forEach(b=>b.style.width=b.dataset.w+"%")));
+}
+function sheetChecklist(id){
+  const l=CHECKLISTS.find(x=>x.id===id);const its=checkItems(l);const ck=S.checks[id]||{};
+  openSheet(`<h2><span class="cl-ic cat-c${l.c}" style="width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff">${ic(l.ic)}</span>${l.name}</h2><p class="sub">${esc(l.desc)}</p>
+  <div id="ckList">${its.map(i=>`<div class="ck ${ck[i.key]?"on":""}" onclick="toggleCheck('${id}','${esc(i.key).replace(/'/g,"\\'")}',this)"><span class="box">${ic("check")}</span><div class="t">${esc(i.label)}${i.cond?`<small>${{infants:"乳幼児",elderly:"高齢者",pets:"ペット"}[i.cond]}がいる世帯</small>`:""}</div>${i.custom?`<button class="del" onclick="event.stopPropagation();delCustom('${id}','${i.key}')">${ic("x")}</button>`:""}</div>`).join("")}</div>
+  <div style="display:flex;gap:8px;margin-top:12px"><input id="ckIn" placeholder="項目を追加" onkeydown="if(event.key==='Enter')addCustom('${id}')"><button class="btn pri sm" style="flex:none" onclick="addCustom('${id}')">${ic("plus")}</button></div>
+  <button class="btn ghost" style="margin-top:12px" onclick="closeSheet()">閉じる</button>`);
+}
+function toggleCheck(lid,key,el){S.checks[lid]=S.checks[lid]||{};S.checks[lid][key]=!S.checks[lid][key];if(!S.checks[lid][key])delete S.checks[lid][key];save();el.classList.toggle("on",!!S.checks[lid][key]);haptic(S.checks[lid][key]?"ok":"LIGHT");if(tab==="check")renderCheck();}
+function addCustom(lid){const v=$("ckIn").value.trim();if(!v)return;S.custom[lid]=S.custom[lid]||[];S.custom[lid].push({key:"c_"+uid(),label:v});save();sheetChecklist(lid);renderCheck();}
+function delCustom(lid,key){S.custom[lid]=(S.custom[lid]||[]).filter(c=>c.key!==key);if(S.checks[lid])delete S.checks[lid][key];save();sheetChecklist(lid);renderCheck();}
+
+/* ---------- もしも ---------- */
+let whistleOn=false,audioCtx=null,whistleNodes=null;
+function renderSos(){
+  $("s-sos").innerHTML=`<div class="sos-hero"><h2>${ic("siren")} 落ち着いて、順番に。</h2><p>この画面の機能はすべて通信なしで動きます。まず安全を確保し、それから連絡と情報を。</p></div>
+  <div class="tools big" style="margin-bottom:14px">
+    <button class="tool" onclick="openLight()"><span class="tic cat-c4">${ic("light")}</span><div>ライト<small>画面全体を白く・SOS点滅</small></div></button>
+    <button class="tool" id="whistleBtn" onclick="toggleWhistle()"><span class="tic cat-c5">${ic("whistle")}</span><div>ホイッスル<small>大音量で居場所を知らせる</small></div></button>
+    <button class="tool" onclick="sheetFamily()"><span class="tic cat-c1">${ic("idcard")}</span><div>家族カード<small>血液型・持病・連絡先</small></div></button>
+    <button class="tool" onclick="sheetMeet()"><span class="tic cat-c8">${ic("pin")}</span><div>集合場所・避難所<small>決めておいた場所</small></div></button>
+    <button class="tool" onclick="sheetMsg()"><span class="tic cat-c3">${ic("msg")}</span><div>安否連絡<small>定型文をコピー・送信</small></div></button>
+    <button class="tool" onclick="sheetNotes()"><span class="tic cat-c10">${ic("note")}</span><div>災害メモ<small>時刻つきで記録</small></div></button>
+  </div>
+  <div class="card"><h3>${ic("book")}行動ガイド</h3><div style="margin-top:6px">${GUIDES.map(g=>`<div class="acc" id="g-${g.id}"><button class="ah" onclick="this.parentNode.classList.toggle('open');haptic('LIGHT')"><span class="aic cat-c${g.c}">${ic(g.ic)}</span>${g.name}<span class="chev">${ic("chevd")}</span></button><div class="ab"><ol>${g.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><div class="nb">${esc(g.note)}</div></div></div>`).join("")}</div></div>
+  <div class="card"><h3>${ic("phone")}災害用伝言ダイヤル 171</h3><div class="muted" style="margin-top:8px;line-height:1.7"><b style="color:var(--text)">録音：</b>171 → 1 → 自宅などの電話番号 → 録音<br><b style="color:var(--text)">再生：</b>171 → 2 → 相手の電話番号 → 再生<br>携帯各社の「災害用伝言板」やweb171も使えます。毎月1日・15日に体験利用できます。</div><a href="tel:171" class="btn sec" style="margin-top:12px;text-decoration:none">${ic("phone")}171 に発信</a></div>
+  <div class="card"><h3>${ic("battery")}電池と水を長持ちさせる</h3><ol style="padding-left:20px;margin-top:8px;display:grid;gap:6px;font-size:13.5px">${SAVE_TIPS.map(t=>`<li>${esc(t)}</li>`).join("")}</ol></div>
+  <p class="muted small" style="padding:0 8px 8px">行動ガイドは一般的な目安です。実際の避難は自治体や気象庁など公的機関の情報を優先してください。</p>`;
+  const wb=$("whistleBtn");if(wb&&whistleOn)wb.querySelector(".tic").style.animation="pulse 1s infinite";
+}
+/* ライト */
+let sosTimer=null;
+function openLight(){haptic("LIGHT");const l=$("light");l.classList.add("show");l.classList.remove("off");try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(w=>{l._wl=w;}).catch(()=>{});}catch(e){}}
+function closeLight(){const l=$("light");l.classList.remove("show","off");stopSos();try{l._wl&&l._wl.release();}catch(e){}}
+function stopSos(){if(sosTimer){clearTimeout(sosTimer);sosTimer=null;}$("light").classList.remove("off");$("lSos").innerHTML=ic("sparkle")+"SOS点滅";}
+function startSos(){
+  const seq=[];const dot=220,dash=660,gap=220,lgap=660;
+  [[dot,dot,dot],[dash,dash,dash],[dot,dot,dot]].forEach((grp,gi)=>{grp.forEach((d,i)=>{seq.push([true,d]);seq.push([false,i<2?gap:lgap]);});});
+  seq.push([false,1400]);
+  let i=0;const l=$("light");
+  const step=()=>{const [on,d]=seq[i%seq.length];l.classList.toggle("off",!on);i++;sosTimer=setTimeout(step,d);};
+  step();$("lSos").innerHTML=ic("x")+"点滅を止める";
+}
+$("lClose").onclick=closeLight;$("lSos").onclick=()=>{haptic("LIGHT");sosTimer?stopSos():startSos();};
+/* ホイッスル（Web Audioで合成。音源ファイルなし） */
+function toggleWhistle(){
+  if(whistleOn){stopWhistle();return;}
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume&&audioCtx.resume();
+    const g=audioCtx.createGain();g.gain.value=0.0001;g.connect(audioCtx.destination);
+    const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator();o1.type="square";o2.type="sawtooth";
+    o1.frequency.value=2800;o2.frequency.value=3520;
+    const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();lfo.frequency.value=6;lg.gain.value=180;lfo.connect(lg);lg.connect(o1.frequency);lg.connect(o2.frequency);
+    const g2=audioCtx.createGain();g2.gain.value=.35;o2.connect(g2);g2.connect(g);o1.connect(g);
+    o1.start();o2.start();lfo.start();
+    g.gain.exponentialRampToValueAtTime(0.9,audioCtx.currentTime+0.05);
+    let alt=false;const sw=setInterval(()=>{alt=!alt;o1.frequency.setTargetAtTime(alt?2200:2800,audioCtx.currentTime,0.02);o2.frequency.setTargetAtTime(alt?2900:3520,audioCtx.currentTime,0.02);},450);
+    whistleNodes={o1,o2,lfo,g,sw};whistleOn=true;haptic("HEAVY");
+    const wb=$("whistleBtn");if(wb){wb.querySelector(".tic").style.animation="pulse 1s infinite";wb.querySelector("div").innerHTML="ホイッスル 鳴らし中<small>タップで止める</small>";}
+    toast("音量を最大にすると遠くまで届きます","whistle");
+  }catch(e){toast("この端末では音を鳴らせませんでした","alert");}
+}
+function stopWhistle(){if(!whistleNodes)return;const n=whistleNodes;try{n.g.gain.setTargetAtTime(0.0001,audioCtx.currentTime,0.03);setTimeout(()=>{try{n.o1.stop();n.o2.stop();n.lfo.stop();}catch(e){}},150);clearInterval(n.sw);}catch(e){}whistleNodes=null;whistleOn=false;if(tab==="sos")renderSos();}
+/* 家族カード */
+const AVC=["#2E86DE","#E8791D","#8E5BD6","#16A34A","#DE3B6A","#0E7C6B","#E5A700","#5B6B78"];
+function sheetFamily(){
+  openSheet(`<h2>${ic("idcard")}家族カード</h2><p class="sub">名前・血液型・持病・連絡先。避難先や救護で聞かれる情報をまとめておきます</p>
+  ${S.family.length?S.family.map((f,i)=>`<div class="fam" onclick="sheetFamilyForm('${f.id}')"><span class="av" style="background:${AVC[i%AVC.length]}">${esc((f.name||"?").slice(0,1))}</span><div class="fb"><b>${esc(f.name||"（名前なし）")}${f.rel?` <span class="badge gray">${esc(f.rel)}</span>`:""}${f.blood?` <span class="badge bad">${esc(f.blood)}型</span>`:""}</b><small>${esc([f.allergy&&"アレルギー:"+f.allergy,f.meds&&"薬:"+f.meds,f.memo].filter(Boolean).join(" ／ ")||"タップして詳細を入力")}</small></div>${f.phone?`<a href="tel:${esc(f.phone.replace(/[^\d+]/g,""))}" onclick="event.stopPropagation()" aria-label="発信">${ic("phone")}</a>`:""}</div>`).join(""):`<div class="empty" style="padding:22px"><div class="eic">${ic("users")}</div><b>まだ登録がありません</b>自分と家族を登録しておきましょう</div>`}
+  <button class="btn sec" style="margin-top:8px" onclick="sheetFamilyForm('')">${ic("plus")}家族を追加</button>
+  ${S.family.length?`<button class="btn ghost" style="margin-top:10px" onclick="shareFamily()">${ic("share")}テキストで共有・印刷用にコピー</button>`:""}
+  <p class="muted small" style="margin-top:12px">この情報は端末の中にだけ保存され、外部には送信されません。</p>`);
+}
+function sheetFamilyForm(id){
+  const f=S.family.find(x=>x.id===id)||{name:"",rel:"",blood:"",allergy:"",meds:"",phone:"",memo:""};
+  openSheet(`<h2>${ic(id?"edit":"plus")}${id?"家族カードを編集":"家族を追加"}</h2>
+  <div class="two"><div><label class="f">名前</label><input id="ffName" value="${esc(f.name)}" placeholder="例：太郎"></div><div><label class="f">続柄</label><input id="ffRel" value="${esc(f.rel)}" placeholder="本人・父・長女 など"></div></div>
+  <div class="two"><div><label class="f">血液型</label><select id="ffBlood"><option value="">不明</option>${["A","B","O","AB"].map(b=>`<option ${f.blood===b?"selected":""}>${b}</option>`).join("")}</select></div><div><label class="f">電話番号</label><input id="ffPhone" type="tel" value="${esc(f.phone)}" placeholder="090-…"></div></div>
+  <label class="f">アレルギー</label><input id="ffAl" value="${esc(f.allergy)}" placeholder="例：そば、ペニシリン"><label class="f">持病・常用薬</label><input id="ffMeds" value="${esc(f.meds)}" placeholder="例：高血圧（アムロジピン）"><label class="f">メモ</label><input id="ffMemo" value="${esc(f.memo)}" placeholder="かかりつけ医、勤務先・学校 など">
+  <div class="btn-row">${id?`<button class="btn danger" style="flex:0 0 auto;width:auto" onclick="if(confirm('削除しますか？')){S.family=S.family.filter(x=>x.id!=='${id}');save();sheetFamily();}">${ic("trash")}</button>`:""}<button class="btn pri" onclick="saveFamily('${id}')">保存する</button></div>`);
+}
+function saveFamily(id){const d={name:$("ffName").value.trim(),rel:$("ffRel").value.trim(),blood:$("ffBlood").value,phone:$("ffPhone").value.trim(),allergy:$("ffAl").value.trim(),meds:$("ffMeds").value.trim(),memo:$("ffMemo").value.trim()};if(!d.name){toast("名前を入力してください","alert");return;}if(id)Object.assign(S.family.find(x=>x.id===id),d);else S.family.push(Object.assign({id:uid()},d));save();haptic("ok");sheetFamily();if(tab==="home")renderHome();}
+function familyText(){return "【家族カード】\n"+S.family.map(f=>`■ ${f.name}${f.rel?`（${f.rel}）`:""}\n${[f.blood&&"血液型:"+f.blood+"型",f.phone&&"電話:"+f.phone,f.allergy&&"アレルギー:"+f.allergy,f.meds&&"持病・薬:"+f.meds,f.memo].filter(Boolean).join("\n")}`).join("\n\n")+(S.meet.p1||S.meet.shelter?`\n\n【集合場所】${[S.meet.p1,S.meet.p2].filter(Boolean).join(" ／ ")}\n【避難所】${S.meet.shelter}`:"");}
+function shareFamily(){shareText(familyText());}
+async function shareText(t){if(navigator.share){try{await navigator.share({text:t});return;}catch(e){if(e&&e.name==="AbortError")return;}}copyText(t);}
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast("コピーしました","copy");}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("コピーしました","copy");}catch(e2){toast("コピーできませんでした","alert");}ta.remove();}}
+/* 集合場所 */
+function sheetMeet(){
+  const m=S.meet;
+  openSheet(`<h2>${ic("pin")}集合場所・避難所</h2><p class="sub">はぐれた時にどこで会うか。近く・遠くの2か所と、地域の避難所を決めておきます</p>
+  <label class="f">集合場所①（自宅の近く）</label><input id="mP1" value="${esc(m.p1)}" placeholder="例：〇〇公園の時計台の前">
+  <label class="f">集合場所②（遠く・広域）</label><input id="mP2" value="${esc(m.p2)}" placeholder="例：〇〇市の祖父母の家">
+  <label class="f">地域の避難所</label><input id="mSh" value="${esc(m.shelter)}" placeholder="例：〇〇小学校 体育館">
+  <label class="f">メモ（経路・注意点など）</label><textarea id="mMemo" placeholder="例：川沿いは通らない。夜は〇〇通り経由">${esc(m.memo)}</textarea>
+  <button class="btn pri" style="margin-top:14px" onclick="S.meet={p1:$('mP1').value.trim(),p2:$('mP2').value.trim(),shelter:$('mSh').value.trim(),memo:$('mMemo').value.trim()};save();haptic('ok');closeSheet();toast('保存しました','check');render()">保存する</button>
+  <p class="muted small" style="margin-top:12px">避難所は自治体のハザードマップや防災マップで確認できます。決めたら家族全員で共有しておきましょう。</p>`);
+}
+/* 安否連絡 */
+function sheetMsg(){
+  const m=S.msg;const d=new Date();
+  const build=()=>`【安否連絡】${$("msName").value.trim()||"（名前）"}です。無事です。\n今は「${$("msPlace").value.trim()||"（場所）"}」にいます。\n${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 時点${$("msPhone").value.trim()?`\n連絡先：${$("msPhone").value.trim()}`:""}${$("msExtra").value.trim()?`\n${$("msExtra").value.trim()}`:""}`;
+  openSheet(`<h2>${ic("msg")}安否連絡</h2><p class="sub">短い定型文にして、つながった一瞬で送れるようにしておきます</p>
+  <div class="two"><div><label class="f">名前</label><input id="msName" value="${esc(m.name)}" placeholder="例：清武" oninput="msgPreview()"></div><div><label class="f">連絡先</label><input id="msPhone" value="${esc(m.phone)}" placeholder="任意" oninput="msgPreview()"></div></div>
+  <label class="f">今いる場所</label><input id="msPlace" value="${esc(m.place)}" placeholder="例：自宅 / 〇〇小学校" oninput="msgPreview()">
+  <label class="f">ひとこと（任意）</label><input id="msExtra" placeholder="例：家は無事。電池を節約するので返信は遅れます" oninput="msgPreview()">
+  <div class="msgbox" id="msgPrev"></div>
+  <div class="btn-row"><button class="btn ghost" onclick="copyText($('msgPrev').textContent)">${ic("copy")}コピー</button><button class="btn pri" onclick="S.msg={name:$('msName').value.trim(),place:$('msPlace').value.trim(),phone:$('msPhone').value.trim()};save();shareText($('msgPrev').textContent)">${ic("share")}送る</button></div>
+  <p class="muted small" style="margin-top:10px">「送る」は端末の共有メニュー（メッセージ・LINE・メールなど）を開きます。通話よりメッセージの方がつながりやすく、電池も節約できます。</p>`);
+  window.msgPreview=()=>{$("msgPrev").textContent=build();};msgPreview();
+}
+/* 災害メモ */
+function sheetNotes(){
+  openSheet(`<h2>${ic("note")}災害メモ</h2><p class="sub">起きたこと・安否・配給の情報などを時刻つきで残します。あとで保険や届け出にも役立ちます</p>
+  <div style="display:flex;gap:8px"><input id="noteIn" placeholder="例：15:02 余震。家族全員無事" onkeydown="if(event.key==='Enter')addNote()"><button class="btn pri sm" style="flex:none" onclick="addNote()">${ic("plus")}</button></div>
+  <div style="margin-top:12px" id="noteList">${notesHtml()}</div>
+  ${S.notes.length?`<div class="btn-row"><button class="btn ghost" onclick="shareText(S.notes.slice().reverse().map(n=>new Date(n.ts).toLocaleString('ja-JP')+' '+n.text).join('\\n'))">${ic("share")}共有</button><button class="btn danger" onclick="if(confirm('メモを全部消しますか？')){S.notes=[];save();sheetNotes();}">${ic("trash")}全消去</button></div>`:""}`);
+}
+function notesHtml(){if(!S.notes.length)return `<p class="muted center" style="padding:16px">まだメモはありません</p>`;return S.notes.slice(-50).reverse().map(n=>{const d=new Date(n.ts);return `<div class="note"><time>${d.getMonth()+1}/${d.getDate()}<br>${pad(d.getHours())}:${pad(d.getMinutes())}</time><div>${esc(n.text)}</div></div>`;}).join("");}
+function addNote(){const v=$("noteIn").value.trim();if(!v)return;S.notes.push({ts:Date.now(),text:v});save();haptic("ok");$("noteIn").value="";$("noteList").innerHTML=notesHtml();}
+
+/* ---------- 設定 ---------- */
+function renderSet(){
+  const h=S.hh,st=S.settings;
+  const hhRow=(k,label,sub,icn)=>`<div class="hh"><div class="l"><span class="ic">${ic(icn)}</span><div><b>${label}</b><small>${sub}</small></div></div><div class="stepper"><button onclick="chgHH('${k}',-1)">${ic("minus")}</button><b>${h[k]}</b><button onclick="chgHH('${k}',1)">${ic("plus")}</button></div></div>`;
+  $("s-set").innerHTML=`
+  <div class="card"><h3>${ic("users")}世帯</h3><p class="muted small" style="margin:4px 0 6px">必要量とチェックリストの基準になります</p>
+    ${hhRow("adults","大人","","senior")}${hhRow("kids","子ども","小学生〜高校生","users")}${hhRow("infants","乳幼児","おむつ・ミルクの項目が増えます","baby")}${hhRow("elderly","高齢者","介護・常用薬の項目が増えます","heart")}${hhRow("pets","ペット","フード・用品の項目が増えます","paw")}
+    <label class="f">目標日数</label><div class="days"><button class="dayopt ${h.days===3?"on":""}" onclick="S.hh.days=3;save();render()"><b>3日分</b><small>最低ライン。まずここから</small></button><button class="dayopt ${h.days===7?"on":""}" onclick="S.hh.days=7;save();render()"><b>1週間分</b><small>推奨。大規模災害に備える</small></button></div>
+  </div>
+  <div class="card"><h3>${ic("bell")}通知</h3>
+    <div class="set-row"><div class="sl"><b>期限が近づいたら知らせる</b><small>${NATIVE?"アプリを閉じていても届きます":"Web版ではホーム画面でお知らせします"}</small></div><button class="sw ${st.notifyExp?"on":""}" onclick="S.settings.notifyExp=!S.settings.notifyExp;save();askNotif();render()"></button></div>
+    <div class="set-row"><div class="sl"><b>何日前に知らせるか</b><small>期限順の色分けにも使います</small></div><select onchange="S.settings.notifyDays=+this.value;save();scheduleNotifications();render()">${[14,30,60,90].map(d=>`<option value="${d}" ${st.notifyDays===d?"selected":""}>${d}日前</option>`).join("")}</select></div>
+    <div class="set-row"><div class="sl"><b>点検日のリマインド</b><small>3月1日・9月1日の年2回</small></div><button class="sw ${st.notifyCheck?"on":""}" onclick="S.settings.notifyCheck=!S.settings.notifyCheck;save();askNotif();render()"></button></div>
+    ${NATIVE?`<button class="btn ghost sm" style="margin-top:10px" onclick="testNotification().then(ok=>toast(ok?'1〜2秒後に通知が届きます':'通知を許可してください','bell'))">通知をテスト</button>`:""}
+  </div>
+  <div class="card"><h3>${ic("moon")}表示</h3>
+    <div class="set-row"><div class="sl"><b>テーマ</b></div><select onchange="S.settings.theme=this.value;save();applyTheme();render()">${[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]].map(([v,l])=>`<option value="${v}" ${st.theme===v?"selected":""}>${l}</option>`).join("")}</select></div>
+  </div>
+  <div class="card"><h3>${ic("clip")}データ</h3><p class="muted small" style="margin:4px 0 10px">すべて端末内に保存。外部には送信しません</p>
+    <button class="btn ghost" onclick="sheetBackup()">${ic("down")}バックアップと復元</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="loadDemo()">${ic("play")}サンプルデータを読み込む（お試し用）</button>
+    <button class="btn danger" style="margin-top:8px" onclick="resetAll()">${ic("trash")}すべてのデータを削除</button>
+  </div>
+  <div class="card flat"><h3>${ic("info")}このアプリについて</h3><p class="muted" style="margin-top:8px;font-size:13px;line-height:1.7">そなえ帳 v${APP_VER}<br>備蓄の目安は内閣府「災害に対するご家庭での備え」・農林水産省「家庭備蓄ポータル」の公開情報を参考にしています。<br>行動ガイドは一般的な指針であり、実際の避難行動は自治体・気象庁など公的機関の情報を優先してください。<br>登録した備蓄が ${S.stats.added}点、使って買い足したのが ${S.stats.consumed}回。</p></div>
+  <div class="ver">通信なし・広告なし・データ収集なし</div>`;
+}
+function chgHH(k,d){S.hh[k]=clamp(S.hh[k]+d,0,20);if(HH().p<1)S.hh.adults=1;save();haptic("LIGHT");render();}
+async function askNotif(){if(NATIVE&&!S.settings.notifAsked){S.settings.notifAsked=true;save();await notifyPermission();}scheduleNotifications();}
+function sheetBackup(){
+  openSheet(`<h2>${ic("down")}バックアップと復元</h2><p class="sub">機種変更のときなどに。文字列をメモアプリなどに保存しておきます</p>
+  <button class="btn pri" onclick="copyText(JSON.stringify(S))">${ic("copy")}バックアップをコピー</button>
+  <button class="btn sec" style="margin-top:8px" onclick="shareText(JSON.stringify(S))">${ic("share")}ファイル・アプリへ共有</button>
+  <label class="f">復元（バックアップの文字列を貼り付け）</label><textarea id="bkIn" placeholder='{"v":1,...}'></textarea>
+  <button class="btn ghost" style="margin-top:10px" onclick="restoreBackup()">${ic("up")}この内容で復元する</button>`);
+}
+function restoreBackup(){try{const j=JSON.parse($("bkIn").value);if(!j||j.v!==1||!Array.isArray(j.items))throw 0;if(!confirm("今のデータを上書きして復元します。よろしいですか？"))return;S=Object.assign(DEF(),j);load._skip=true;save();load();applyTheme();closeSheet();toast("復元しました","check");render();}catch(e){toast("形式が正しくありません","alert");}}
+function resetAll(){if(!confirm("すべてのデータを削除します。元に戻せません。よろしいですか？"))return;if(!confirm("本当に削除しますか？"))return;localStorage.removeItem(STORE_KEY);if(NATIVE&&CAP.Preferences){try{CAP.Preferences.remove({key:STORE_KEY});}catch(e){}}S=DEF();save();applyTheme();toast("削除しました","trash");startOnboarding();}
+function loadDemo(){
+  if(S.items.length&&!confirm("今のデータをサンプルで上書きします。よろしいですか？（バックアップは「バックアップと復元」から取れます）"))return;
+  const d=(m,dd)=>{const x=new Date();x.setMonth(x.getMonth()+m);x.setDate(x.getDate()+(dd||0));return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;};
+  const mk=(name,qty,exp,place)=>{const p=PRESETS.find(x=>x[0]===name);return {id:uid(),added:Date.now(),name,cat:p[1],unit:p[2],per:p[3],qty,exp:exp===undefined?(p[4]?d(p[4]):""):exp,place:place||p[5],memo:""};};
+  S=DEF();S.setup.done=true;S.hh={adults:2,kids:1,infants:0,elderly:1,pets:1,days:3};
+  S.items=[mk("水 2L",12,d(30)),mk("水 500ml",6,d(0,20)),mk("アルファ米",9,d(48)),mk("レトルトご飯",6,d(0,12)),mk("カップ麺",8,d(0,-3)),mk("缶詰",10,d(20)),mk("レトルトカレー",6,d(11)),mk("乾パン・ビスケット",2,d(0,25)),mk("簡易トイレ",30,d(120)),mk("トイレットペーパー",12,""),mk("ウェットティッシュ",4,d(24)),mk("懐中電灯",2,""),mk("ランタン",1,""),mk("乾電池 単3",16,d(60)),mk("モバイルバッテリー",2,""),mk("カセットコンロ",1,""),mk("カセットボンベ",6,d(40)),mk("救急セット",1,""),mk("常備薬",5,d(0,8)),mk("経口補水液",4,d(9)),mk("介護用おむつ",20,""),mk("常用薬（予備）",7,d(4)),mk("ペットフード",5,d(6)),mk("ペットシーツ",30,""),mk("軍手・手袋",3,""),mk("カイロ",20,d(30)),mk("現金（小銭）",5,"")];
+  S.shop=[{id:uid(),name:"カップ麺",qty:4,unit:"個",done:false,itemId:S.items.find(i=>i.name==="カップ麺").id},{id:uid(),name:"乾電池 単1",qty:4,unit:"本",done:false},{id:uid(),name:"ラップ",done:true}];
+  S.checks={bag:{"飲料水（500ml×2〜3本）":1,"すぐ食べられる食料（1〜2日分）":1,"懐中電灯・ヘッドライト":1,"モバイルバッテリー・充電ケーブル":1,"救急セット・常備薬":1,"マスク・除菌シート":1,"軍手・タオル":1,"笛（ホイッスル）":1,"現金（小銭を含む）":1,"常用薬とお薬手帳":1,"ペットフード・水（数日分）":1},home:{"飲料水を人数×3日分以上":1,"カセットコンロとボンベ":1,"ランタン（部屋全体を照らせる明かり）":1,"モバイルバッテリーを常に満充電":1,"ラップ・ポリ袋（食器の節水に）":1,"現金":1},safety:{"背の高い家具を壁に固定した":1,"寝室に倒れてくる家具がない":1,"寝室の枕元にスリッパ・懐中電灯を置いた":1,"ブレーカーとガスの元栓の位置を知っている":1,"ハザードマップで自宅の危険度を確認した":1,"避難所・避難場所の場所を確認した":1},info:{"家族の集合場所を決めた（もしもタブに登録）":1,"家族カードに連絡先を登録した":1,"自治体の防災メール・防災アプリを登録した":1,"緊急速報メールの受信をONにした":1}};
+  S.family=[{id:uid(),name:"清武 太郎",rel:"本人",blood:"A",phone:"090-0000-0000",allergy:"",meds:"",memo:"勤務先：〇〇株式会社（渋谷）"},{id:uid(),name:"清武 花子",rel:"妻",blood:"O",phone:"080-0000-0000",allergy:"そば",meds:"",memo:""},{id:uid(),name:"清武 さくら",rel:"長女",blood:"A",phone:"",allergy:"",meds:"",memo:"〇〇小学校 3年2組"},{id:uid(),name:"清武 きよ",rel:"母",blood:"B",phone:"",allergy:"",meds:"高血圧（アムロジピン）",memo:"かかりつけ：〇〇クリニック"}];
+  S.meet={p1:"〇〇公園の時計台の前",p2:"埼玉の叔父の家",shelter:"〇〇小学校 体育館",memo:"川沿いの道は通らない。夜は〇〇通り経由。"};
+  S.msg={name:"清武",place:"自宅",phone:"090-0000-0000"};S.notes=[];S.settings.lastCheck=d(-5);S.stats={added:27,consumed:9};
+  save();applyTheme();haptic("ok");toast("サンプルデータを読み込みました","check");showTab("home");
+}
+
+/* ---------- オンボーディング ---------- */
+let obStep=0,obPick={};
+const OB_PICKS=["水 2L","アルファ米","カップ麺","缶詰","簡易トイレ","カセットボンベ","懐中電灯","乾電池 単3","モバイルバッテリー","救急セット","トイレットペーパー","レトルトご飯"];
+function startOnboarding(){obStep=0;obPick={};$("ob").classList.add("show");renderOb();}
+function renderOb(){
+  const h=S.hh;
+  const dots=`<div class="dots">${[0,1,2].map(i=>`<i class="${i===obStep?"on":""}"></i>`).join("")}</div>`;
+  const stepper=(k,label,sub,icn)=>`<div class="hh"><div class="l"><span class="ic">${ic(icn)}</span><div><b>${label}</b>${sub?`<small>${sub}</small>`:""}</div></div><div class="stepper"><button onclick="S.hh.${k}=Math.max(0,S.hh.${k}-1);renderOb()">${ic("minus")}</button><b>${h[k]}</b><button onclick="S.hh.${k}=Math.min(20,S.hh.${k}+1);renderOb()">${ic("plus")}</button></div></div>`;
+  const picks=OB_PICKS.map(n=>PRESETS.find(p=>p[0]===n)).filter(p=>!p[1]||CATS.find(c=>c.id===p[1]&&(!c.when||c.when(HH())))).concat(HH().infants?[PRESETS.find(p=>p[0]==="おむつ")]:[],HH().pets?[PRESETS.find(p=>p[0]==="ペットフード")]:[]);
+  const steps=[
+   `<div class="logo">${ic("shield")}</div><h1>そなえ帳</h1><p class="lead">家庭の備蓄と防災を、ひとつの手帳に。<br>通信なし・データは端末の中だけ。</p>
+    <div class="feat"><span class="fic cat-c1">${ic("drop")}</span><div><b>必要量が一目でわかる</b><p>家族の人数から、水・食料・トイレの必要量を自動計算。足りない分がすぐわかります。</p></div></div>
+    <div class="feat"><span class="fic cat-c2">${ic("refresh")}</span><div><b>期限切れを出さない</b><p>期限が近いものをお知らせ。「使って買い足す」ローリングストックが自然に回ります。</p></div></div>
+    <div class="feat"><span class="fic cat-c5">${ic("siren")}</span><div><b>もしもの時の道具箱</b><p>ライト・ホイッスル・家族カード・安否連絡。圏外でも、この画面だけで動きます。</p></div></div>`,
+   `<h1>ご家庭のことを教えてください</h1><p class="lead">必要な備蓄の量を計算します。あとから変更できます。</p><div class="card">${stepper("adults","大人","","senior")}${stepper("kids","子ども","小学生〜高校生","users")}${stepper("infants","乳幼児","おむつ・ミルクの項目が増えます","baby")}${stepper("elderly","高齢者","介護・常用薬の項目が増えます","heart")}${stepper("pets","ペット","","paw")}</div>
+    <label class="f">まずの目標</label><div class="days"><button class="dayopt ${h.days===3?"on":""}" onclick="S.hh.days=3;renderOb()"><b>3日分</b><small>最低ライン。まずここから</small></button><button class="dayopt ${h.days===7?"on":""}" onclick="S.hh.days=7;renderOb()"><b>1週間分</b><small>推奨。大規模災害に備える</small></button></div>`,
+   `<h1>いま家にあるものは？</h1><p class="lead">わかる範囲でOK。期限や置き場所はあとから追加できます。</p><div class="card" style="padding:6px 16px">${picks.map(p=>{const c=CAT[p[1]];const n=obPick[p[0]]||0;return `<div class="hh"><div class="l"><span class="ic cat-c${c.c}" style="color:#fff">${ic(c.ic)}</span><div><b>${esc(p[0])}</b><small>${p[3]?`1${p[2]}=${p[3]}${c.unit}`:c.name}</small></div></div><div class="stepper"><button onclick="obPick['${p[0]}']=Math.max(0,(obPick['${p[0]}']||0)-1);renderOb()">${ic("minus")}</button><b>${n}</b><button onclick="obPick['${p[0]}']=(obPick['${p[0]}']||0)+1;renderOb()">${ic("plus")}</button></div></div>`;}).join("")}</div>`,
+  ];
+  $("ob").innerHTML=`<div class="in">${dots}<div class="step on">${steps[obStep]}</div><div class="grow"></div><div class="btn-row" style="margin-top:20px">${obStep>0?`<button class="btn ghost" style="flex:0 0 auto;width:auto" onclick="obStep--;renderOb()">${ic("back")}</button>`:""}<button class="btn pri" onclick="obNext()">${obStep===2?"はじめる":"次へ"}</button></div>${obStep===2?`<button class="link" style="margin-top:14px;text-align:center" onclick="finishOb(true)">あとで登録する</button>`:""}</div>`;
+  $("ob").scrollTop=0;
+}
+function obNext(){haptic("LIGHT");if(obStep===1&&HH().p<1){toast("人数を1人以上にしてください","alert");return;}if(obStep<2){obStep++;renderOb();}else finishOb(false);}
+function finishOb(skip){
+  if(!skip){Object.entries(obPick).forEach(([n,q])=>{if(!q)return;const p=PRESETS.find(x=>x[0]===n);S.items.push({id:uid(),added:Date.now(),name:p[0],cat:p[1],unit:p[2],per:p[3],qty:q,exp:"",place:p[5],memo:""});S.stats.added++;});}
+  S.setup.done=true;save();haptic("ok");$("ob").classList.remove("show");showTab("home");
+  if(S.items.some(i=>!i.exp&&PRESETS.find(p=>p[0]===i.name&&p[4])))setTimeout(()=>toast("期限は各項目をタップ→編集で登録できます","cal"),900);
+  askNotif();
+}
+
+/* ---------- 起動 ---------- */
+(async function init(){
+  load();await restoreFromNative();applyTheme();
+  const q=new URLSearchParams(location.search);
+  if(q.get("demo")==="1"&&!S.items.length){loadDemo._silent=true;}
+  if(!S.setup.done){if(q.get("demo")==="1"){loadDemo();}else startOnboarding();}
+  else showTab(q.get("tab")||"home");
+  if(q.get("tab")&&S.setup.done)showTab(q.get("tab"));
+  if(q.get("open")&&S.setup.done){const o=q.get("open");setTimeout(()=>{({family:sheetFamily,msg:sheetMsg,add:sheetAdd,score:sheetScore,meet:sheetMeet,notes:sheetNotes,bag:()=>sheetChecklist("bag"),item:()=>{const it=S.items.find(i=>i.name==="カップ麺")||S.items[0];it&&sheetItem(it.id);},light:openLight,guide:()=>{const g=document.querySelector("#g-quake");g&&g.classList.add("open");}})[o]?.();},200);}
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.setup.done)render();});
+  window.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSheet();closeLight();}});
+  if("serviceWorker" in navigator&&!NATIVE&&location.protocol.startsWith("http")){try{navigator.serviceWorker.register("sw.js");}catch(e){}}
+  scheduleNotifications();
+})();
+</script>
+</body>
+</html>

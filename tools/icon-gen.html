@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>そなえ帳 アイコン生成</title>
+<!-- icon-*.png / ios-app/assets/icon.png の生成元。Chromeヘッドレスで撮影する（tools/make-icons.sh） -->
+<style>html,body{margin:0;background:#0E7C6B}canvas{display:block}</style>
+<canvas id="c" width="1024" height="1024"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d'),W=1024;
+const bg=x.createLinearGradient(0,0,W,W);bg.addColorStop(0,'#17A48C');bg.addColorStop(1,'#0A5E51');
+x.fillStyle=bg;x.fillRect(0,0,W,W);
+x.fillStyle='rgba(255,255,255,.08)';x.beginPath();x.arc(800,180,240,0,7);x.fill();
+x.fillStyle='rgba(255,255,255,.06)';x.beginPath();x.arc(140,900,200,0,7);x.fill();
+function shield(s){x.beginPath();x.moveTo(512,184);x.lineTo(744,272);x.lineTo(744,488);x.bezierCurveTo(744,644,644,768,512,840);x.bezierCurveTo(380,768,280,644,280,488);x.lineTo(280,272);x.closePath();}
+x.shadowColor='rgba(0,0,0,.25)';x.shadowBlur=40;x.shadowOffsetY=16;
+const sh=x.createLinearGradient(0,184,0,840);sh.addColorStop(0,'#FFFFFF');sh.addColorStop(1,'#DDF4EE');
+shield();x.fillStyle=sh;x.fill();x.shadowColor='transparent';
+shield();x.strokeStyle='rgba(10,94,81,.18)';x.lineWidth=12;x.stroke();
+x.strokeStyle='#0E7C6B';x.lineWidth=60;x.lineCap='round';x.lineJoin='round';
+x.beginPath();x.moveTo(410,516);x.lineTo(482,588);x.lineTo(624,428);x.stroke();
+</script>
