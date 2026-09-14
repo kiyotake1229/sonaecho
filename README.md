@@ -75,6 +75,7 @@
   index.html              アプリ本体（CSS/JS/プリセット・チェックリスト・行動ガイドすべて内包）
   README.md               このファイル
   岩崎さんへの提案書.md     企画意図・差別化・収益/展開案・デモ手順
+  プレゼンの進め方.md       説明するときの台本（1分版・10分版・想定問答）
   manifest.json / sw.js   PWA用
   icon.svg                アイコン元データ
   icon-192.png / icon-512.png / apple-touch-icon.png
