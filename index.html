@@ -1129,12 +1129,17 @@ function finishOb(skip){
 
 /* ---------- 起動 ---------- */
 (async function init(){
-  load();await restoreFromNative();applyTheme();
+  load();await restoreFromNative();
   const q=new URLSearchParams(location.search);
+  if(q.get("theme"))S.settings.theme=q.get("theme");
+  if(SHOT){const st=document.createElement("style");st.textContent="*{animation:none!important;transition:none!important}";document.head.appendChild(st);}
+  applyTheme();
   if(q.get("demo")==="1"&&!S.items.length){loadDemo._silent=true;}
-  if(!S.setup.done){if(q.get("demo")==="1"){loadDemo();}else startOnboarding();}
+  if(!S.setup.done){if(q.get("demo")==="1"){loadDemo();if(q.get("theme")){S.settings.theme=q.get("theme");applyTheme();}}else startOnboarding();}
   else showTab(q.get("tab")||"home");
+  if(q.get("seg"))stockSeg=q.get("seg");
   if(q.get("tab")&&S.setup.done)showTab(q.get("tab"));
+  if(q.get("ob")==="1")startOnboarding();
   if(q.get("open")&&S.setup.done){const o=q.get("open");setTimeout(()=>{({family:sheetFamily,msg:sheetMsg,add:sheetAdd,score:sheetScore,meet:sheetMeet,notes:sheetNotes,bag:()=>sheetChecklist("bag"),item:()=>{const it=S.items.find(i=>i.name==="カップ麺")||S.items[0];it&&sheetItem(it.id);},light:openLight,guide:()=>{const g=document.querySelector("#g-quake");g&&g.classList.add("open");}})[o]?.();},200);}
   document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.setup.done)render();});
   window.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSheet();closeLight();}});
