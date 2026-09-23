@@ -11,8 +11,8 @@
 |---|---|
 | 状態 | **v1.1.0。Web版 完成 / PWA対応 / iOSプロジェクト構築済み（GitHub Actions でビルド確認）。引き渡し可** |
 | Web公開・サポートURL | https://kiyotake1229.github.io/sonaecho/ （GitHub Pages。`?demo=1` でサンプル入り） |
-| 開発確認用 | https://claude.ai/code/artifact/06991fa1-4947-410d-8bdd-869830ed2f6d （Claude Artifact） |
-| 提案資料（プレゼン用ページ） | https://claude.ai/code/artifact/2fc71742-57bc-4d93-9e82-377e273f4665 （元ファイル: `資料/プレゼン資料/提案書.html`） |
+| 開発確認用 | https://claude.ai/artifact/1pFsgnpLpnANoWnvf9qrzY （Claude Artifact） |
+| 提案資料（プレゼン用ページ） | https://claude.ai/artifact/6uBubGU9VS9zPuvLNiGHXJ （元ファイル: `資料/プレゼン資料/提案書.html`） |
 | リポジトリ | https://github.com/kiyotake1229/sonaecho |
 | Bundle ID | `work.ltv.sonaecho` |
 | 本体 | `index.html`（約160KB。CSS/JS/データすべて内包。外部ライブラリなし） |
@@ -28,7 +28,7 @@
 
 | 資料 | 場所 |
 |---|---|
-| 提案書（プレゼン用ページ） | https://claude.ai/code/artifact/2fc71742-57bc-4d93-9e82-377e273f4665 |
+| 提案書（プレゼン用ページ） | https://claude.ai/artifact/6uBubGU9VS9zPuvLNiGHXJ |
 | 提案書（PDF。そのまま配れる） | `資料/プレゼン資料/そなえ帳_提案書.pdf` |
 | 提案書（文書版） | [資料/岩崎さんへの提案書.md](資料/岩崎さんへの提案書.md) |
 | 話す台本 | [資料/プレゼンの進め方.md](資料/プレゼンの進め方.md) |

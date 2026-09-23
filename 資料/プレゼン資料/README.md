@@ -1,6 +1,6 @@
 # プレゼン資料（提案書ページ・PDF）
 
-- 公開URL（Claude Artifact。スマホでもPCでも見られる）: https://claude.ai/code/artifact/2fc71742-57bc-4d93-9e82-377e273f4665
+- 公開URL（Claude Artifact。スマホでもPCでも見られる）: https://claude.ai/artifact/6uBubGU9VS9zPuvLNiGHXJ
 - PDF: `そなえ帳_提案書.pdf`（A4横・10ページ。そのまま配れる）
 - 話す台本: [../プレゼンの進め方.md](../プレゼンの進め方.md)
 - 文書版の提案書: [../岩崎さんへの提案書.md](../岩崎さんへの提案書.md)
