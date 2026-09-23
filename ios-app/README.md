@@ -15,7 +15,7 @@ Webアプリ本体（`../index.html`）をネイティブiOSアプリとして�
 | ネイティブ触覚・通知・保存・共有 | 組み込み済み（`../index.html` 内で `NATIVE` 分岐） |
 | 防災カードの画像の保存・共有 | 組み込み済み（v1.1。`@capacitor/filesystem` を追加、`Info.plist` に `NSPhotoLibraryAddUsageDescription`） |
 | 縦画面固定（iPhone） | 設定済み（`Info.plist`） |
-| `pod install` | 手元では未実行（Xcode無し）。**GitHub Actions の macOS 上で `pod install` → ビルドを確認**（v1.0: 2026-09-14、v1.1: CI_RESULT）。Xcodeのある環境で下記を1回実行 |
+| `pod install` | 手元では未実行（Xcode無し）。**GitHub Actions の macOS 上で `pod install` → ビルドを確認**（v1.0: 2026-09-14、v1.1: 2026-09-23、`@capacitor/filesystem` 追加後も成功）。Xcodeのある環境で下記を1回実行 |
 
 ```bash
 npm install

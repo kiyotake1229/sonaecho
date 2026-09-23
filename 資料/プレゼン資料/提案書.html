@@ -135,32 +135,69 @@ footer{padding-block:30px;color:var(--ink2);font-size:13px;border-top:1px solid 
   .grid3,.grid4,.gal{grid-template-columns:1fr 1fr}
   .shots{flex-direction:column;align-items:center}.shot{width:min(240px,100%)}
 }
+
+/* v1.1 */
+.news{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:18px;font-size:13px}
+.news b{font-size:12px;letter-spacing:.08em;color:var(--teal);margin-right:4px}
+.news span{background:var(--teal-l);color:var(--ink);font-weight:700;padding:4px 10px;border-radius:20px}
+.shot.a4 img{background:#fff}
+@media print{
+  @page{size:A4 landscape;margin:9mm 12mm}
+  html,body{background:#fff!important}
+  body{padding:0;font-size:14px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .phone{animation:none;max-height:560px}
+  .hero{padding-block:24px 0}
+  section{break-before:page;border-top:none;padding-block:4px 0}
+  .card,.shot,.step,.fact,table,.diff,.st-row,.links,.qr,figure,.callout{break-inside:avoid}
+  .sh{break-after:avoid;margin-bottom:16px}
+  .diff{padding-block:8px}
+  .shots .shot{width:170px}
+  .gal{grid-template-columns:repeat(4,116px);justify-content:center;gap:12px 22px}
+  .gal .shot figcaption{font-size:11px;padding:6px 6px 7px;line-height:1.4}
+  .step{padding:10px 16px}
+  .steps{gap:8px}
+  .callout{margin-top:12px;padding:12px 16px}
+  .shot:hover{transform:none}
+  footer{break-before:avoid}
+  /* 印刷では画面幅の判定が狭い側になるため、横並びを明示する */
+  .hero{grid-template-columns:1.25fr 1fr;gap:32px;padding-block:18px 0}
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  .diff{grid-template-columns:1fr 1fr}
+  .diff:nth-child(even) .txt{order:2}
+  .status{grid-template-columns:repeat(2,1fr)}
+  .links{grid-template-columns:1fr 200px}
+  .sh{flex-wrap:nowrap}
+  .sh p{margin-left:auto;text-align:right;max-width:28em;width:auto}
+  .facts{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 </style>
 
 <div class="wrap">
 <header class="bar">
   <div class="brand"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0E7C6B"/><path d="M256 92 L372 136 V244 C372 322 322 384 256 420 C190 384 140 322 140 244 V136 Z" fill="#fff"/><path d="M205 258 L241 294 L312 214" fill="none" stroke="#0E7C6B" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/></svg>そなえ帳</div>
-  <div class="meta"><span>宛先 <b>岩崎さん</b></span><span>差出 <b>清武</b></span><span>2026年9月14日</span><span>自主企画アプリの提案</span></div>
+  <div class="meta"><span>宛先 <b>岩崎さん</b></span><span>差出 <b>清武</b></span><span>2026年9月23日（v1.1）</span><span>自主企画アプリの提案</span></div>
 </header>
 
 <div class="hero">
   <div>
     <div class="eyebrow">Proposal 01 · 家庭の備蓄と防災</div>
     <h1><span class="nw">「何をどれだけ」</span><br>がわかれば、<br>家庭の備えは<em>続く</em>。</h1>
-    <p class="lead">世帯人数から水・食料・トイレの必要量を計算し、賞味期限を見守り、もしもの時は通信なしで使える道具箱になる手帳アプリです。テーマ選びから自分で行った1本目として提案します。</p>
+    <p class="lead">世帯人数から水・食料・トイレの必要量を計算し、いまの備蓄で何日すごせるかと次にやることを示し、賞味期限を見守る手帳アプリです。もしもの時は通信なしで使える道具箱になります。テーマ選びから自分で行った1本目として提案します。</p>
     <div class="facts">
-      <div class="fact"><b class="num">3日<span style="font-size:14px">→</span>7日</b><span>内閣府の推奨に沿った目標設定</span></div>
-      <div class="fact"><b class="num">120+</b><span>タップで登録できる備蓄プリセット</span></div>
+      <div class="fact"><b class="num">約1.5日</b><span>いまの備蓄で何日もつかを表示（サンプル家庭）</span></div>
+      <div class="fact"><b class="num">146</b><span>タップで登録できる備蓄プリセット</span></div>
       <div class="fact"><b>圏外OK</b><span>全機能が通信なしで動作</span></div>
     </div>
+    <div class="news"><b>9/23 改善</b><span>何日もつか</span><span>次にやること</span><span>備蓄の配分</span><span>紙に残す防災カード</span><span>期限のまとめ登録</span></div>
   </div>
-  <div class="phone"><img src="screenshots/home.png" alt="ホーム画面。そなえ度80、飲料水27/36L、簡易トイレ30/60回などのバー" width="780" height="1688"></div>
+  <div class="phone"><img src="screenshots/home.png" alt="ホーム画面。いまの備蓄で約1.5日、簡易トイレが先に尽きる。次にやることに、飲料水をあと9L・簡易トイレをあと30回・持ち出し袋" width="780" height="1688"></div>
 </div>
 
 <section>
   <div class="sh"><span class="n">01</span><h2>なぜこのテーマか</h2><p>需要があり、季節性があり、うちの作り方がそのまま強みになる領域を選びました。</p></div>
   <div class="grid3">
-    <div class="card"><span class="k">需要</span><h3>「量がわからない」が最大の壁</h3><p>内閣府・農水省は最低3日、推奨1週間分の家庭備蓄を呼びかけていますが、1週間分を備えている家庭は少数です。水は1人1日3L、トイレは5回。数字を人数に掛けて示すだけで、行動に変わります。</p></div>
+    <div class="card"><span class="k">需要</span><h3>「量がわからない」が最大の壁</h3><p>内閣府・農水省は最低3日、推奨1週間分の家庭備蓄を呼びかけていますが、1週間分を備えている家庭は少数です。水は1人1日3L、トイレは5回、カセットボンベは1人1週間6本。数字を人数に掛けて示すだけで、行動に変わります。</p></div>
     <div class="card amber"><span class="k">季節性</span><h3>年2回、必ず話題になる</h3><p>3月11日と9月1日（防災の日）にはメディア・ストア特集・自治体の啓発が重なります。リリースと更新をこの時期に合わせられるアプリです。</p></div>
     <div class="card red"><span class="k">強み</span><h3>通信なしが、そのまま価値になる</h3><p>これまでの5本はすべて「通信なし・端末内保存」で作ってきました。防災アプリではそれ自体が売りです。圏外でも停電でもサーバー障害でも、この手帳は開けます。</p></div>
   </div>
@@ -169,28 +206,30 @@ footer{padding-block:30px;color:var(--ink2);font-size:13px;border-top:1px solid 
 <section>
   <div class="sh"><span class="n">02</span><h2>何が違うのか</h2><p>数を記録するだけの備蓄アプリと、情報配信が中心の自治体アプリの間を埋めます。</p></div>
   <div class="diff">
-    <div class="txt"><h3>必要量から逆算する</h3><p>人数と目標日数から必要量を自動計算し、「あと水9L・トイレ30回」と具体的に示します。何を買えばいいかが、その場でわかります。乳幼児・高齢者・ペットがいれば、おむつやフードの行が増えます。</p><div class="pt"><span class="pill">そなえ度 0〜100</span><span class="pill">内訳で次の一手がわかる</span></div></div>
-    <div class="shots"><figure class="shot"><img src="screenshots/score.png" alt="そなえ度の内訳シート" loading="lazy"><figcaption>そなえ度の内訳</figcaption></figure><figure class="shot"><img src="screenshots/onboarding.png" alt="初回設定の画面" loading="lazy"><figcaption>初回は3画面で完了</figcaption></figure></div>
+    <div class="txt"><h3>何日もつかと、次に何を買うかまで示す</h3><p>人数と目標日数から必要量を計算し、「いまの備蓄で約1.5日。簡易トイレが先に尽きます」と言い切ります。その下の「次にやること」は、そなえ度が上がる順。「簡易トイレ ×30回分を買い足しリストへ」と、何をいくつ買えばよいかまで1タップでつながります。</p><div class="pt"><span class="pill">分類ごとの日数</span><span class="pill">＋点数で優先順位</span><span class="pill">足りない分を自動計算</span></div></div>
+    <div class="shots"><figure class="shot"><img src="screenshots/score.png" alt="そなえ度の内訳。分類ごとに何日もつかのバー"><figcaption>何日もつか（内訳）</figcaption></figure><figure class="shot"><img src="screenshots/onboarding.png" alt="初回設定の画面"><figcaption>初回は3画面で完了</figcaption></figure></div>
   </div>
   <div class="diff">
-    <div class="txt"><h3>期限切れを出さない設計</h3><p>「1つ使った」で数量が減り、買い足しリストに自動で入ります。買ったら「備蓄へ」で戻す。ふだん食べて買い足すローリングストックの流れが、アプリの中で一周します。期限切れは必要量に数えないので、数字がごまかされません。</p><div class="pt"><span class="pill">期限順の一覧</span><span class="pill">N日前に通知</span><span class="pill">年2回の点検日</span></div></div>
-    <div class="shots"><figure class="shot"><img src="screenshots/exp.png" alt="期限順の備蓄一覧" loading="lazy"><figcaption>期限順</figcaption></figure><figure class="shot"><img src="screenshots/item.png" alt="備蓄の詳細と『1個使った』ボタン" loading="lazy"><figcaption>「1個使った」で買い足しへ</figcaption></figure></div>
+    <div class="txt"><h3>期限切れを出さない設計</h3><p>期限は「今日から1年・3年・5年」のボタンと、まとめて登録で素早く入ります。「1つ使った」で買い足しリストへ、買ったら「備蓄へ」。期限が違う分は別の行で管理し、使いきった古い行は自動で片付きます。期限切れは必要量に数えないので、数字がごまかされません。</p><div class="pt"><span class="pill">期限順の一覧</span><span class="pill">期限ごとに別の行</span><span class="pill">N日前に通知</span><span class="pill">元に戻す</span></div></div>
+    <div class="shots"><figure class="shot"><img src="screenshots/exp.png" alt="期限順の備蓄一覧"><figcaption>期限順</figcaption></figure><figure class="shot"><img src="screenshots/item.png" alt="備蓄の詳細と『1個使った』ボタン"><figcaption>「1個使った」で買い足しへ</figcaption></figure></div>
   </div>
   <div class="diff">
-    <div class="txt"><h3>平時と非常時を、ひとつのアプリで</h3><p>ふだんは備蓄の手帳。もしもの時はライト・ホイッスル・家族カード・安否連絡・行動ガイドの道具箱になります。家族カードや安否連絡の定型文は、平時に入れておくからこそ非常時に使えます。すべて通信なしで動きます。</p><div class="pt"><span class="pill">SOSモールス点滅</span><span class="pill">音源不要の警笛</span><span class="pill">171の手順</span></div></div>
-    <div class="shots"><figure class="shot"><img src="screenshots/sos.png" alt="もしもタブ。ライト、ホイッスル、家族カードなどのボタンと行動ガイド" loading="lazy"><figcaption>もしもの道具箱</figcaption></figure><figure class="shot"><img src="screenshots/family.png" alt="家族カードのシート" loading="lazy"><figcaption>家族カード</figcaption></figure></div>
+    <div class="txt"><h3>平時と非常時を、ひとつのアプリで</h3><p>もしもの時は、救援まで何日もたせるかを選ぶと1日に使える量がわかる「備蓄の配分」と、家族の連絡先・集合場所・171の使い方・備蓄の置き場所をA4 1枚にまとめる「防災カード」。スマホの電池が切れても、紙なら家族全員が見られます。ライト・ホイッスル・安否連絡もすべて通信なしで動きます。</p><div class="pt"><span class="pill">3〜14日の配分</span><span class="pill">印刷・PDF・画像保存</span><span class="pill">SOSモールス点滅</span></div></div>
+    <div class="shots"><figure class="shot"><img src="screenshots/ration.png" alt="備蓄の配分。1日に使える量と目安との比較"><figcaption>備蓄の配分</figcaption></figure><figure class="shot a4"><img src="screenshots/paper-card.png" alt="わが家の防災カード（A4）。家族の連絡先、はぐれたら、つながらない時は、緊急の番号、備蓄の置き場所"><figcaption>紙に残す防災カード（A4）</figcaption></figure></div>
   </div>
 </section>
 
 <section>
   <div class="sh"><span class="n">03</span><h2>画面</h2><p>サンプルデータ（4人世帯・子ども／高齢者／ペットあり）を読み込んだ状態です。</p></div>
   <div class="gal">
-    <figure class="shot"><img src="screenshots/stock.png" alt="備蓄の一覧" loading="lazy"><figcaption>備蓄 一覧・分類フィルタ</figcaption></figure>
-    <figure class="shot"><img src="screenshots/add.png" alt="プリセットから追加" loading="lazy"><figcaption>プリセットから追加</figcaption></figure>
-    <figure class="shot"><img src="screenshots/check.png" alt="チェックリスト一覧" loading="lazy"><figcaption>4つのチェックリスト</figcaption></figure>
-    <figure class="shot"><img src="screenshots/bag.png" alt="非常持ち出し袋のチェックリスト" loading="lazy"><figcaption>非常持ち出し袋（世帯で項目が変わる）</figcaption></figure>
-    <figure class="shot"><img src="screenshots/msg.png" alt="安否連絡の定型文" loading="lazy"><figcaption>安否連絡の定型文</figcaption></figure>
-    <figure class="shot"><img src="screenshots/dark.png" alt="ダークモードのホーム" loading="lazy"><figcaption>ダークモード</figcaption></figure>
+    <figure class="shot"><img src="screenshots/sos.png" alt="もしもタブ。8つの道具と行動ガイド"><figcaption>もしもの道具箱</figcaption></figure>
+    <figure class="shot"><img src="screenshots/paper.png" alt="紙に残すシート"><figcaption>紙に残す（印刷・共有）</figcaption></figure>
+    <figure class="shot"><img src="screenshots/family.png" alt="家族カードのシート"><figcaption>家族カード</figcaption></figure>
+    <figure class="shot"><img src="screenshots/place.png" alt="備蓄を置き場所ごとに表示"><figcaption>置き場所ごとの一覧</figcaption></figure>
+    <figure class="shot"><img src="screenshots/add.png" alt="プリセットから追加"><figcaption>プリセットから追加</figcaption></figure>
+    <figure class="shot"><img src="screenshots/bag.png" alt="非常持ち出し袋のチェックリスト"><figcaption>持ち出し袋（世帯で項目が変わる）</figcaption></figure>
+    <figure class="shot"><img src="screenshots/msg.png" alt="安否連絡の定型文"><figcaption>安否連絡の定型文</figcaption></figure>
+    <figure class="shot"><img src="screenshots/dark.png" alt="ダークモードのホーム"><figcaption>ダークモード</figcaption></figure>
   </div>
 </section>
 
@@ -199,8 +238,8 @@ footer{padding-block:30px;color:var(--ink2);font-size:13px;border-top:1px solid 
   <div class="tw"><table>
     <thead><tr><th>段階</th><th>内容</th><th>ねらい</th></tr></thead>
     <tbody>
-      <tr><td class="st">v1.0 今回</td><td>無料・広告なしで公開。防災の日（9/1）と3/11に合わせて露出</td><td>レビューと利用状況の把握。ポートフォリオに生活実用の1本を加える</td></tr>
-      <tr><td class="st">v1.1</td><td>買い切りの「プラス」（例：480円）。バーコード登録、家族間のQRコード共有（通信なしのまま）、複数の備蓄場所（自宅・車・職場）、CSV書き出し</td><td>継続利用者からの回収。通信なしの方針を崩さずに拡張</td></tr>
+      <tr><td class="st">無料版（今回）</td><td>無料・広告なしで公開。防災の日（9/1）と3/11に合わせて露出。防災カードは話題づくりにも使える</td><td>レビューと利用状況の把握。ポートフォリオに生活実用の1本を加える</td></tr>
+      <tr><td class="st">プラス（買い切り）</td><td>例：480円。バーコード登録、家族間のQRコード共有（通信なしのまま）、複数の備蓄場所（自宅・車・職場）、CSV書き出し</td><td>継続利用者からの回収。通信なしの方針を崩さずに拡張</td></tr>
       <tr><td class="st">法人向け</td><td>企業・オフィスの備蓄管理モード（従業員数ベースの必要量、複数拠点、点検記録）</td><td>東京都は条例で事業者に3日分の備蓄を努力義務化。総務・防災担当の需要。自治体・保険会社・防災用品メーカーへのOEMも</td></tr>
     </tbody>
   </table></div>
@@ -209,38 +248,38 @@ footer{padding-block:30px;color:var(--ink2);font-size:13px;border-top:1px solid 
 <section>
   <div class="sh"><span class="n">05</span><h2>5分でデモする順番</h2><p>最後の「機内モード」が一番伝わります。</p></div>
   <div class="steps">
-    <div class="step"><div><b>設定 →「サンプルデータを読み込む」</b><span>4人世帯・27点登録済みの状態になります</span></div></div>
-    <div class="step"><div><b>ホーム：そなえ度80「安心」</b><span>飲料水あと9L、トイレあと30回。リングをタップして内訳を見せる</span></div></div>
-    <div class="step"><div><b>備蓄 → 期限順</b><span>期限切れのカップ麺をタップ →「1個使った」→ 買い足しリストに入る</span></div></div>
-    <div class="step"><div><b>チェック → 非常持ち出し袋</b><span>ペットと高齢者の項目が入っている</span></div></div>
-    <div class="step"><div><b>もしも</b><span>ライト → SOS点滅、ホイッスル（音量注意）、家族カード、安否連絡 →「送る」</span></div></div>
+    <div class="step"><div><b>サンプル入りで開く</b><span>?demo=1 のURLで、4人世帯・27点登録済みの状態になります</span></div></div>
+    <div class="step"><div><b>ホーム：いまの備蓄で約1.5日</b><span>簡易トイレが先に尽きる。そなえ度78「あと少し」。リングをタップして分類ごとの日数を見せる</span></div></div>
+    <div class="step"><div><b>次にやること：簡易トイレをあと30回 ＋7点</b><span>タップで「簡易トイレ 30回分」が買い足しリストへ。元に戻すも見せる</span></div></div>
+    <div class="step"><div><b>備蓄 → 買い足し →「備蓄へ」→ 期限順</b><span>期限が違う分は別の行で登録。期限切れのカップ麺と30日以内の4点</span></div></div>
+    <div class="step"><div><b>もしも：備蓄の配分 → 紙に残す</b><span>7日もたせると水は1人1日1Lほど。防災カードは印刷した紙も見せる。ライトのSOS点滅</span></div></div>
     <div class="step hl"><div><b>機内モードにして、同じ操作をもう一度</b><span>すべて動く。ここが一番のポイント</span></div></div>
   </div>
   <div class="callout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><div>スマホで <a href="https://kiyotake1229.github.io/sonaecho/?demo=1">kiyotake1229.github.io/sonaecho/?demo=1</a> を開くと、最初からサンプル入りで起動します。「共有 → ホーム画面に追加」でアプリとして使えます（インストール不要・オフライン可）。</div></div>
 </section>
 
 <section>
-  <div class="sh"><span class="n">06</span><h2>現在の状態</h2><p>Web版は完成。iOSはXcodeのある環境で1コマンド実行すれば開けます。</p></div>
+  <div class="sh"><span class="n">06</span><h2>現在の状態</h2><p>Web版は v1.1 で完成。iOSはXcodeのある環境でコマンドを2つ実行すれば開けます。</p></div>
   <div class="status">
     <div class="card">
-      <div class="st-row"><span>Web版・PWA</span><span class="tag ok">完成・公開中</span></div>
+      <div class="st-row"><span>Web版・PWA（v1.1.0）</span><span class="tag ok">完成・公開中</span></div>
       <div class="st-row"><span>iOSプロジェクト（Capacitor 7）</span><span class="tag ok">構築済み</span></div>
-      <div class="st-row"><span>アイコン・スプラッシュ</span><span class="tag ok">生成済み</span></div>
-      <div class="st-row"><span>申請文面（説明・キーワード・カテゴリ）</span><span class="tag ok">下書き済み</span></div>
-      <div class="st-row"><span>GitHub Actions でのiOSビルド確認</span><span class="tag ok">設定済み</span></div>
+      <div class="st-row"><span>GitHub Actions でのiOSビルド確認</span><span class="tag ok">成功（9/23）</span></div>
+      <div class="st-row"><span>申請文面（説明・キーワード・カテゴリ）</span><span class="tag ok">v1.1を反映</span></div>
+      <div class="st-row"><span>開発の記録（docs/ #0001〜#0009）</span><span class="tag ok">作成済み</span></div>
     </div>
     <div class="card">
       <div class="st-row"><span>Xcode環境で <code>npx cap sync ios</code>（pod install）</span><span class="tag todo">岩崎さん側</span></div>
-      <div class="st-row"><span>実機確認（触覚・通知・音量・共有）</span><span class="tag todo">残</span></div>
-      <div class="st-row"><span>App Store用スクリーンショット 3サイズ</span><span class="tag todo">残</span></div>
+      <div class="st-row"><span>実機確認（触覚・通知・共有・防災カードの保存）</span><span class="tag todo">残</span></div>
+      <div class="st-row"><span>App Store用スクリーンショット</span><span class="tag todo">残</span></div>
       <div class="st-row"><span>Apple Developer Program</span><span class="tag todo">社内</span></div>
-      <div class="st-row"><span>制作期間</span><span><b>1日</b>（企画・設計・実装・文書）</span></div>
+      <div class="st-row"><span>制作期間</span><span><b>v1.0 1日 ＋ 改善 1日</b></span></div>
     </div>
   </div>
   <div class="grid3" style="margin-top:18px">
-    <div class="card"><h3 style="font-size:16px">審査（4.2）への備え</h3><p>完全オフライン・端末内保存・継続利用の設計に加え、ローカル通知・触覚・共有シートを実装。備考欄の英文も用意済み。</p></div>
-    <div class="card"><h3 style="font-size:16px">プライバシー</h3><p>通信機能なし。備蓄・家族カード・メモはすべて端末内。App Store Connect では「データを収集しません」を選択。</p></div>
-    <div class="card"><h3 style="font-size:16px">内容の根拠</h3><p>必要量は内閣府・農水省の公開情報。行動ガイドは一般的な防災指針で、アプリ内に「公的機関の情報を優先」と明記。</p></div>
+    <div class="card"><h3 style="font-size:16px">審査（4.2）への備え</h3><p>完全オフライン・端末内保存・継続利用の設計に加え、ローカル通知・触覚・共有シート（文章と画像）を実装。備考欄の英文も用意済み。</p></div>
+    <div class="card"><h3 style="font-size:16px">プライバシー</h3><p>通信機能なし。備蓄・家族カード・メモ、防災カードの画像もすべて端末内で作成。App Store Connect では「データを収集しません」を選択。</p></div>
+    <div class="card"><h3 style="font-size:16px">内容の根拠</h3><p>必要量は農水省・内閣府の公開情報（カセットボンベは1人1週間約6本）。行動ガイドは一般的な防災指針で、アプリ内に「公的機関の情報を優先」と明記。</p></div>
   </div>
 </section>
 
@@ -252,13 +291,14 @@ footer{padding-block:30px;color:var(--ink2);font-size:13px;border-top:1px solid 
       <span>開発確認用（Artifact）</span><a href="https://claude.ai/code/artifact/06991fa1-4947-410d-8bdd-869830ed2f6d">claude.ai/code/artifact/06991fa1-…</a>
       <span>リポジトリ</span><a href="https://github.com/kiyotake1229/sonaecho">github.com/kiyotake1229/sonaecho</a>
       <span>申請手順</span><span style="color:var(--ink);font-weight:400">Dropbox：アプリ開発/自己開発/そなえ帳/ios-app/岩崎さんへの引き渡し手順.md</span>
-      <span>提案書（文書版）</span><span style="color:var(--ink);font-weight:400">Dropbox：アプリ開発/自己開発/そなえ帳/岩崎さんへの提案書.md</span>
+      <span>提案書（文書版）</span><span style="color:var(--ink);font-weight:400">Dropbox：アプリ開発/自己開発/そなえ帳/資料/岩崎さんへの提案書.md</span>
+      <span>提案書（PDF）</span><span style="color:var(--ink);font-weight:400">Dropbox：アプリ開発/自己開発/そなえ帳/資料/プレゼン資料/そなえ帳_提案書.pdf</span>
     </div></div>
     <div class="qr"><div id="qr"></div><small>スマホで開く（サンプル入り）</small></div>
   </div>
 </section>
 
-<footer><span>そなえ帳 v1.0.0 · 単一HTML約125KB · 外部ライブラリ・音源・画像ファイルなし</span><span>清武</span></footer>
+<footer><span>そなえ帳 v1.1.0 · 単一HTML約160KB · 外部ライブラリ・音源・画像ファイルなし</span><span>清武</span></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

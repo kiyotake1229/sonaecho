@@ -141,7 +141,7 @@ push すると GitHub Actions が macOS 上で iOS の署名なしビルドを�
 
 ## 残作業
 
-- [x] GitHub Actions での iOSビルド成功を確認（v1.0: 2026-09-14。v1.1 はプラグイン追加後に再確認）
+- [x] GitHub Actions での iOSビルド成功を確認（v1.0: 2026-09-14、v1.1: 2026-09-23。`pod install` → `xcodebuild` とも成功）
 - [ ] 実機で触覚・通知・共有シート・防災カードの保存とプリント・ホイッスルの音量を確認
 - [ ] App Store 用スクリーンショット（6.7 / 6.5 / 5.5 インチ。iPad 対応のため 13インチも求められる可能性あり）
 - [ ] Apple Developer Program 登録 → 岩崎さんへ引き渡し
